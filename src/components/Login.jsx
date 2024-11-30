@@ -13,7 +13,7 @@ const Login = () => {
         setError(""); // Reset error message
 
         try {
-            const response = await fetch("/api/auth/login", {
+            const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

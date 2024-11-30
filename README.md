@@ -5,7 +5,7 @@
   "password": "mypassword123"
 }
 
-/api/auth/login
+https://webrtc-backend-vtyh.onrender.com/api/auth/login
 {
   "email": "janedoe@example.com",
   "password": "mypassword123"

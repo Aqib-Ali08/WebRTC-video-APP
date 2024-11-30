@@ -14,7 +14,7 @@ const Signup = () => {
     setError(""); // Reset error state
 
     try {
-      const response = await fetch("/api/auth/signup", {
+      const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
