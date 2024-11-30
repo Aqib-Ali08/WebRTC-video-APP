@@ -1,0 +1,119 @@
+.maincontainer2 {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+  }
+  
+  .Meetingcontainer {
+    display: flex;
+    width: 100%;
+  }
+  
+  .sidebar {
+    width: 20%;
+    background-color: #f4f4f4;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .menu {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .menu li {
+    margin: 10px 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .menu .icon {
+    margin-right: 10px;
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .header .time {
+    font-size: 16px;
+    color: #666;
+  }
+  
+  .header .icons span {
+    margin: 0 10px;
+    cursor: pointer;
+  }
+  
+  .header .user-icon {
+    background-color: purple;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 50%;
+  }
+  
+  .content {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .content h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: purple;
+  }
+  
+  .actions .action {
+    margin: 10px 0;
+  }
+  
+  .actions input {
+    padding: 10px;
+    width: 200px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .actions button {
+    padding: 10px 20px;
+    border: none;
+    background-color: purple;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .illustration img {
+    width: 200px;
+    margin: 20px 0;
+  }
+  
+  footer {
+    text-align: center;
+    padding: 10px;
+  }
+  
+  footer a {
+    text-decoration: none;
+    color: purple;
+  }
+  

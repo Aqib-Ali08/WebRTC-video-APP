@@ -1,0 +1,129 @@
+.maincontainer3 {
+    margin: 0;
+    background-color: #1c1c1c;
+    font-family: Arial, sans-serif;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  #callInterface {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .Vidheader {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #282828;
+    box-sizing: border-box;
+  }
+  
+  .status-icon {
+    color: white;
+    font-size: 18px;
+  }
+
+  .vid-main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+    background-color: #4a5fd1;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 50px;
+  }
+
+  .user-details {
+    margin-top: 10px;
+    text-align: center;
+    color: white;
+  }
+
+  .footer {
+    width: 100%;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #282828;
+  }
+
+  .footer-icons {
+    display: flex;
+    gap: 15px;
+  }
+
+  .footer-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #3b3b3b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .footer-icon:hover {
+    background-color: #565656;
+  }
+
+  .footer-icon.red {
+    background-color: #ff4f4f;
+  }
+
+  .footer-icon.muted {
+    background-color: #8b0000;
+  }
+
+  .footer-icon.video-off {
+    background-color: #ffa500;
+  }
+
+  #endMessage {
+    display: none;
+    color: white;
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  /* Rest of your styles */
+  .remote-videos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .remote-videos video {
+    width: 200px;
+    height: 150px;
+    border-radius: 10px;
+    background-color: black;
+  }
+  
