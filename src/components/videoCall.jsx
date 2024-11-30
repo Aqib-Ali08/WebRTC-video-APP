@@ -3,7 +3,7 @@ import io from 'socket.io-client';  // Import Socket.IO client
 import '../assets/videoCall.css';
 import { useNavigate, useParams } from 'react-router-dom';
 
-const socket = io('http://localhost:5000'); // Adjust for your server
+const socket = io('https://webrtc-backend-vtyh.onrender.com'); // Adjust for your server
 
 const CallInterface = () => {
   const [isMicMuted, setIsMicMuted] = useState(false);
