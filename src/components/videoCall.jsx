@@ -12,6 +12,7 @@ const VideoCall = () => {
   const { roomId } = useParams();
 
   useEffect(() => {
+    
     // Get local media stream
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then(stream => {
