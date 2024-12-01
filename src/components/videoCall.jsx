@@ -1,58 +1,74 @@
 import React, { useState, useEffect, useRef } from 'react';
-import io from 'socket.io-client';  // Import Socket.IO client
-import '../assets/videoCall.css';
+import io from 'socket.io-client';
 import { useNavigate, useParams } from 'react-router-dom';
-
-const socket = io('https://webrtc-backend-vtyh.onrender.com'); // Adjust for your server
-
-const CallInterface = () => {
-  const [isMicMuted, setIsMicMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
-  const [isCallEnded, setIsCallEnded] = useState(false);
+import "../assets/meeting.css"
+const socket = io('https://webrtc-backend-vtyh.onrender.com');
+// const socket = io('http://localhost:5000'); // Replace with your backend URL
+const VideoCall = () => {
   const [remoteStreams, setRemoteStreams] = useState([]);
   const localVideoRef = useRef(null);
-  const remoteVideoRefs = useRef({});
   const peerConnections = useRef({});
   const navigate = useNavigate();
   const { roomId } = useParams();
 
   useEffect(() => {
-    // Join the room when the component mounts
-    socket.emit('join-room', roomId);
-console.log("Joined Room ID:",roomId);
+    // Get local media stream
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then(stream => {
         localVideoRef.current.srcObject = stream;
-console.log(stream);
+
+        // Join the room
+        socket.emit('join-room', roomId);
+
+        // Listen for new users joining
         socket.on('user-connected', userId => {
           const peerConnection = createPeerConnection(userId, stream);
           peerConnections.current[userId] = peerConnection;
+
+          // Create an offer
+          peerConnection.createOffer().then(offer => {
+            peerConnection.setLocalDescription(offer);
+            socket.emit('offer', { to: userId, offer });
+          });
         });
 
-        socket.on('offer', async ({ userId, offer }) => {
-          const peerConnection = createPeerConnection(userId, stream);
+        // Handle receiving an offer
+        socket.on('offer', async ({ from, offer }) => {
+          const peerConnection = createPeerConnection(from, stream);
+          peerConnections.current[from] = peerConnection;
           await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
           const answer = await peerConnection.createAnswer();
           await peerConnection.setLocalDescription(answer);
-          socket.emit('answer', { roomId, answer, to: userId });
+          socket.emit('answer', { to: from, answer });
         });
 
-        socket.on('answer', ({ userId, answer }) => {
-          const peerConnection = peerConnections.current[userId];
+        // Handle receiving an answer
+        socket.on('answer', ({ from, answer }) => {
+          const peerConnection = peerConnections.current[from];
           if (peerConnection) {
             peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
           }
         });
 
-        socket.on('ice-candidate', ({ userId, candidate }) => {
-          const peerConnection = peerConnections.current[userId];
-          if (candidate && peerConnection) {
+        // Handle receiving ICE candidates
+        socket.on('ice-candidate', ({ from, candidate }) => {
+          const peerConnection = peerConnections.current[from];
+          if (peerConnection && candidate) {
             peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+        });
+
+        // Handle users leaving
+        socket.on('user-disconnected', userId => {
+          if (peerConnections.current[userId]) {
+            peerConnections.current[userId].close();
+            delete peerConnections.current[userId];
+            setRemoteStreams(prevStreams => prevStreams.filter(stream => stream.userId !== userId));
           }
         });
       });
 
-    // Cleanup on component unmount
+    // Cleanup on unmount
     return () => {
       socket.emit('leave-room', roomId);
       Object.values(peerConnections.current).forEach(pc => pc.close());
@@ -60,111 +76,56 @@ console.log(stream);
     };
   }, [roomId]);
 
+  // Create a new peer connection
   const createPeerConnection = (userId, stream) => {
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
 
+    // Add local tracks to the connection
     stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
+    // Handle ICE candidates
     pc.onicecandidate = event => {
       if (event.candidate) {
-        socket.emit('ice-candidate', {
-          roomId,
-          candidate: event.candidate,
-          to: userId
-        });
+        socket.emit('ice-candidate', { to: userId, candidate: event.candidate });
       }
     };
 
+    // Handle remote tracks
     pc.ontrack = event => {
+      console.log(event.streams);
       const [remoteStream] = event.streams;
-
-      if (!remoteVideoRefs.current[userId]) {
-        setRemoteStreams(prevStreams => [...prevStreams, { userId, stream: remoteStream }]);
-        remoteVideoRefs.current[userId] = remoteStream;
-      }
+      setRemoteStreams(prevStreams => {
+        const existingStream = prevStreams.find(stream => stream.userId === userId);
+        if (!existingStream) {
+          return [...prevStreams, { userId, stream: remoteStream }];
+        }
+        return prevStreams;
+      });
     };
 
     return pc;
   };
 
-  const toggleMic = () => {
-    setIsMicMuted(!isMicMuted);
-    localVideoRef.current.srcObject.getAudioTracks()[0].enabled = isMicMuted;
-  };
-
-  const toggleVideo = () => {
-    setIsVideoOff(!isVideoOff);
-    localVideoRef.current.srcObject.getVideoTracks()[0].enabled = !isVideoOff;
-  };
-
-  const endCall = () => {
-    setIsCallEnded(true);
-    setTimeout(() => {
-      setIsCallEnded(false);
-      socket.emit('leave-room', roomId);
-      navigate("/meeting");
-      window.location.reload();
-    }, 4000);
-  };
-
-  if (isCallEnded) {
-    return (
-      <div className="endMessage">
-        Call has ended. Redirecting you to the Meeting page.<br />
-        Thank you for using the service!
-      </div>
-    );
-  }
-
   return (
-    <div className='maincontainer3'>
-      <div id="callInterface">
-        <div className="Vidheader">
-          <span className="status-icon">{isMicMuted ? '🔇' : '🎤'}</span>
-        </div>
-        <div className="vid-main-content">
-          <video ref={localVideoRef} autoPlay playsInline muted />
-          <div className="remote-videos">
-            {remoteStreams.map(({ userId, stream }) => (
-              <video
-                key={userId}
-                ref={ref => {
-                  if (ref) {
-                    ref.srcObject = stream;
-                  }
-                }}
-                autoPlay
-                playsInline
-              />
-            ))}
-          </div>
-        </div>
-        <div className="footer">
-          <div className="footer-icons">
-            <div
-              id="micButton"
-              className={`footer-icon ${isMicMuted ? 'muted' : ''}`}
-              onClick={toggleMic}
-            >
-              {isMicMuted ? '🔇' : '🎤'}
-            </div>
-            <div
-              id="videoButton"
-              className={`footer-icon ${isVideoOff ? 'video-off' : ''}`}
-              onClick={toggleVideo}
-            >
-              {isVideoOff ? '📷' : '🎥'}
-            </div>
-            <div id="endCallButton" className="footer-icon red" onClick={endCall}>
-              📞
-            </div>
-          </div>
-        </div>
+    <div className="video-call-container">
+      <video ref={localVideoRef} autoPlay playsInline muted className="local-video" />
+      <div className="remote-videos">
+        {remoteStreams.map(({ userId, stream }) => (
+          <video
+            key={userId}
+            ref={ref => {
+              if (ref) ref.srcObject = stream;
+            }}
+            autoPlay
+            playsInline
+            className="remote-video"
+          />
+        ))}
       </div>
     </div>
   );
 };
 
-export default CallInterface;
+export default VideoCall;

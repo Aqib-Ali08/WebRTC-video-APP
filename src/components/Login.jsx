@@ -26,7 +26,7 @@ const Login = () => {
             }
 
             const data = await response.json();
-            alert("Login successful! Redirecting...");
+            // alert("Login successful! Redirecting...");
             console.log("Login response:", data);
             navigate('/meeting')
             login(data)

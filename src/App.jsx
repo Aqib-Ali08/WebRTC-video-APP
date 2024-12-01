@@ -23,11 +23,11 @@ const App = () => {
         {/* Protected routes */}
         <Route
           path="/meeting"
-          element={isAuthenticated ? <MeetingPage /> : <Navigate to="/login" replace />}
+          element={true ? <MeetingPage /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/videoCall/:roomId"
-          element={isAuthenticated ? <VideoCall /> : <Navigate to="/login" replace />}
+          element={true ? <VideoCall /> : <Navigate to="/login" replace />}
         />
       </Routes>
     </Router>

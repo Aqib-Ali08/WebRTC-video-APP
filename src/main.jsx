@@ -4,9 +4,9 @@ import './index.css'
 import App from './App.jsx'
 import { LoginProvider } from './context/loginContext.jsx'
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode>
     <LoginProvider>
     <App />
     </LoginProvider>
-  </StrictMode>,
+  // </StrictMode>,
 )

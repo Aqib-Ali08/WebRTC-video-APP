@@ -4,8 +4,9 @@ import io from 'socket.io-client';
 import '../assets/meeting.css';
 import meetingBGImg from '../assets/metting1.png';
 
-const socket = io('https://webrtc-backend-vtyh.onrender.com'); // Adjust for your server
+const socket = io('https://webrtc-backend-vtyh.onrender.com');
 
+// const socket = io('http://localhost:5000');
 const MeetingPage = () => {
   const [currentTime, setCurrentTime] = useState('');
   const [roomCode, setRoomCode] = useState('');

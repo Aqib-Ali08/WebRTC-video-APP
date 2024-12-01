@@ -27,7 +27,7 @@ const Signup = () => {
       }
 
       // Assuming the server responds with a success message
-      alert("Sign-Up successful! Redirecting to Login...");
+      // alert("Sign-Up successful! Redirecting to Login...");
       navigate("/login"); // Redirect to the login page
     } catch (err) {
       console.error(err);
