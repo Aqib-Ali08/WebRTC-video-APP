@@ -172,7 +172,7 @@ const VideoCall = () => {
   const fetchUserDetails = async () => {
     try {
       const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/users", {
-      // const response = await fetch("http://localhost:5000/api/auth/users", {
+        // const response = await fetch("http://localhost:5000/api/auth/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -204,10 +204,7 @@ const VideoCall = () => {
           <div className="app-main">
             <div className="video-call-wrapper" style={remoteStreams.length === 0 ? { justifyContent: "center" } : {}} >
               <div className="video-participant" >
-                {
-                  !isVideoOff ? <div className={remoteStreams.length === 0 ? "local-video flex" : "remote-video flex"}><img src={userDetails.profilePic} className={"avatarImg"} /><p style={{position:'relative',top:'4rem',fontSize:"20px"}}>{userDetails.username}</p></div>
-                    :
-                    <video ref={localVideoRef} autoPlay playsInline muted className={remoteStreams.length === 0 ? "local-video" : "remote-video"} />}
+                <video ref={localVideoRef} autoPlay playsInline muted className={remoteStreams.length === 0 ? "local-video" : "remote-video"} />
               </div>
               {remoteStreams.map(({ userId, stream }) => (
                 <div className="video-participant">
