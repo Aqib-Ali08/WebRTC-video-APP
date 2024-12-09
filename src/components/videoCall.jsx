@@ -138,29 +138,35 @@ const VideoCall = () => {
   const handleVideo = async () => {
     if (localStreamRef.current) {
       const videoTrack = localStreamRef.current.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled; // Toggle video track
-        setIsVideoOff(!isVideoOff);
-
-        // If turning the video back on, ensure the stream is re-initialized
-        if (!isVideoOff) {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            const newVideoTrack = stream.getVideoTracks()[0];
-            if (newVideoTrack) {
-              localStreamRef.current.removeTrack(videoTrack); // Remove the old track
-              localStreamRef.current.addTrack(newVideoTrack); // Add the new track
-              if (localVideoRef.current) {
-                localVideoRef.current.srcObject = localStreamRef.current; // Update the video element
-              }
-            }
-          } catch (err) {
-            console.error("Error re-enabling video:", err);
+  
+      if (isVideoOff) {
+        // Turn video on: Restart the video track
+        try {
+          const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const newVideoTrack = newStream.getVideoTracks()[0];
+          const sender = localStreamRef.current
+            .getTracks()
+            .find(track => track.kind === "video")
+            ?.replaceTrack(newVideoTrack);
+  
+          if (sender) {
+            localStreamRef.current.addTrack(newVideoTrack);
+            newStream.getTracks().forEach(track => {
+              if (track !== newVideoTrack) track.stop();
+            });
           }
+        } catch (error) {
+          console.error("Error turning on video:", error);
         }
+      } else {
+        // Turn video off: Stop the video track
+        videoTrack.stop();
+        setIsVideoOff(!isVideoOff);
       }
     }
   };
+  
+  
 
   const handleEndCall = () => {
     if (localStreamRef.current) {
