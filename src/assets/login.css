@@ -106,4 +106,32 @@
       transform: scale(1);
     }
   }
+  .input-label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
   
+  .gender-options {
+    display: flex;
+    gap: 1rem; /* Space between options */
+    align-items: center;
+  }
+  
+  .gender-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Space between radio button and label */
+    font-size: 0.9rem;
+  }
+  
+  .gender-option input[type="radio"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #007bff; /* Optional: Change the radio button color */
+    cursor: pointer;
+  }
+  
+  .gender-option label {
+    cursor: pointer;
+  }

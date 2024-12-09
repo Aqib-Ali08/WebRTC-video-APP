@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import '../assets/meeting.css';
 import meetingBGImg from '../assets/metting1.png';
-
+import { useLogin } from "../context/loginContext.jsx";
 const socket = io('https://webrtc-backend-vtyh.onrender.com');
 
 // const socket = io('http://localhost:5000');
@@ -11,14 +11,18 @@ const MeetingPage = () => {
   const [currentTime, setCurrentTime] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [error, setError] = useState('');
+  const [userDetails, setUserDetails] = useState([]);
   const navigate = useNavigate();
-
+  const { user } = useLogin()
+  let email  = useRef();
   useEffect(() => {
-   
+    // console.log()
+    email = user.user.email
     updateTime();
+    fetchUserDetails()
     const intervalId = setInterval(updateTime, 1000);
     return () => clearInterval(intervalId);
-    
+
   }, []);
 
   const updateTime = () => {
@@ -31,10 +35,37 @@ const MeetingPage = () => {
   const generateRoomId = () => {
     return Math.floor(10000000 + Math.random() * 90000000).toString();
   };
+  const fetchUserDetails = async() => {
+    try {
+      const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/users", {
+      // const response = await fetch("http://localhost:5000/api/auth/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email:email}),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed. Please check your credentials.");
+      }
+
+      const data = await response.json();
+      // alert("Login successful! Redirecting...");
+      // console.log("Login response:", data);
+      // navigate('/meeting')
+      // login(data)
+      console.log(data)
+      setUserDetails(data)
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Something went wrong. Please try again.");
+    }
+  }
 
   const handleCreateMeeting = () => {
     const roomId = generateRoomId();
-    console.log("Created Room ID:",roomId);
+    console.log("Created Room ID:", roomId);
     socket.emit('create-room', roomId);
     socket.on('room-created', ({ roomId }) => {
       navigate(`/videocall/${roomId}`);
@@ -68,7 +99,7 @@ const MeetingPage = () => {
             <div className="icons">
               <span>🔍</span>
               <span>⚙️</span>
-              <span className="user-icon">B</span>
+              <span className="user-icon"><img src={userDetails.profilePic} alt=""  className='avatar'/></span>
             </div>
           </div>
           <div className="content">

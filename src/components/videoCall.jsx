@@ -8,20 +8,24 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import CallEndIcon from '@mui/icons-material/CallEnd';
+import { useLogin } from "../context/loginContext.jsx";
 const socket = io('https://webrtc-backend-vtyh.onrender.com');
 // const socket = io('http://localhost:5000'); // Replace with your backend URL
 const VideoCall = () => {
   const [remoteStreams, setRemoteStreams] = useState([]);
   const [ismicOff, setIsmicOff] = useState(true);
   const [isVideoOff, setIsVideoOff] = useState(true);
+  const [userDetails, setUserDetails] = useState([]);
   const localVideoRef = useRef(null);
   const localStreamRef = useRef(null);
   const peerConnections = useRef({});
   const navigate = useNavigate();
   const { roomId } = useParams();
-
+  const { user } = useLogin()
+  let email = useRef(null);
   useEffect(() => {
-
+    email.current = user.user.email
+    fetchUserDetails()
     // Get local media stream
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then(stream => {
@@ -131,57 +135,107 @@ const VideoCall = () => {
     };
 
   }
-    const handleVideo = () => {
-      if (localStreamRef.current) {
-        const videoTrack = localStreamRef.current.getVideoTracks()[0]
+  const handleVideo = async () => {
+    if (localStreamRef.current) {
+      const videoTrack = localStreamRef.current.getVideoTracks()[0];
+      if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled; // Toggle video track
         setIsVideoOff(!isVideoOff);
-      } // Update state
-    };
-    const handleEndCall = () => {
-      if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(track => track.stop());
-      }
-      socket.emit('leave-room', roomId);
-      navigate('/meeting');
-    };
 
-    return (
-      <div className="maincontainer3">
-        <div className='callInterface'>
-          <div className="vid-main-content">
-            <div class="app-main">
-              <div class="video-call-wrapper" style={remoteStreams.length === 0 ? { justifyContent: "center" } : {}} >
-                <div class="video-participant" >
-                  <video ref={localVideoRef} autoPlay playsInline muted className={remoteStreams.length === 0 ? "local-video" : "remote-video"} />
-                </div>
-                {remoteStreams.map(({ userId, stream }) => (
-                  <div class="video-participant">
-                    <video
-                      key={userId}
-                      ref={ref => {
-                        if (ref) ref.srcObject = stream;
-                      }}
-                      autoPlay
-                      playsInline
-                      className="remote-video"
-                    />
-                  </div>
-                ))}
+        // If turning the video back on, ensure the stream is re-initialized
+        if (!isVideoOff) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            const newVideoTrack = stream.getVideoTracks()[0];
+            if (newVideoTrack) {
+              localStreamRef.current.removeTrack(videoTrack); // Remove the old track
+              localStreamRef.current.addTrack(newVideoTrack); // Add the new track
+              if (localVideoRef.current) {
+                localVideoRef.current.srcObject = localStreamRef.current; // Update the video element
+              }
+            }
+          } catch (err) {
+            console.error("Error re-enabling video:", err);
+          }
+        }
+      }
+    }
+  };
+
+  const handleEndCall = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+    }
+    socket.emit('leave-room', roomId);
+    navigate('/meeting');
+  };
+  const fetchUserDetails = async () => {
+    try {
+      const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/users", {
+      // const response = await fetch("http://localhost:5000/api/auth/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email.current }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed. Please check your credentials.");
+      }
+
+      const data = await response.json();
+      // alert("Login successful! Redirecting...");
+      // console.log("Login response:", data);
+      // navigate('/meeting')
+      // login(data)
+      console.log(data)
+      setUserDetails(data)
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Something went wrong. Please try again.");
+    }
+  }
+
+  return (
+    <div className="maincontainer3">
+      <div className='callInterface'>
+        <div className="vid-main-content">
+          <div className="app-main">
+            <div className="video-call-wrapper" style={remoteStreams.length === 0 ? { justifyContent: "center" } : {}} >
+              <div className="video-participant" >
+                {
+                  !isVideoOff ? <div className={remoteStreams.length === 0 ? "local-video flex" : "remote-video flex"}><img src={userDetails.profilePic} className={"avatarImg"} /><p style={{position:'relative',top:'4rem',fontSize:"20px"}}>{userDetails.username}</p></div>
+                    :
+                    <video ref={localVideoRef} autoPlay playsInline muted className={remoteStreams.length === 0 ? "local-video" : "remote-video"} />}
               </div>
-            </div>
-          </div>
-          <div class="footer">
-            <div class="footer-icons">
-              <div id="micButton" class="footer-icon" onClick={handleMic}>{ismicOff ? <MicIcon /> : <MicOffIcon />}</div>
-              <div id="videoButton" class="footer-icon" onClick={handleVideo}>{isVideoOff ? <VideocamIcon /> : <VideocamOffIcon />}</div>
-              <div id="endCallButton" class="footer-icon red" onClick={handleEndCall}><CallEndIcon /></div>
+              {remoteStreams.map(({ userId, stream }) => (
+                <div className="video-participant">
+                  <video
+                    key={userId}
+                    ref={ref => {
+                      if (ref) ref.srcObject = stream;
+                    }}
+                    autoPlay
+                    playsInline
+                    className="remote-video"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
+        <div className="footer">
+          <div className="footer-icons">
+            <div id="micButton" className="footer-icon" onClick={handleMic}>{ismicOff ? <MicIcon /> : <MicOffIcon />}</div>
+            <div id="videoButton" className="footer-icon" onClick={handleVideo}>{isVideoOff ? <VideocamIcon /> : <VideocamOffIcon />}</div>
+            <div id="endCallButton" className="footer-icon red" onClick={handleEndCall}><CallEndIcon /></div>
+          </div>
+        </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 
 export default VideoCall;

@@ -161,6 +161,16 @@
     margin-bottom: 10px;
     object-fit: cover;
   }
+  .avatarImg{
+    height: 200px;
+    width:200px
+  }
+  .flex{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
   .name-tag {
     position: absolute;
     bottom: 12px;

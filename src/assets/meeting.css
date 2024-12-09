@@ -9,6 +9,13 @@
     display: flex;
     width: 100%;
   }
+  .user-icon .avatar{
+    height: 24px;
+    width: 25px;
+  } 
+  .icons{
+    display: flex;
+  }
   
   .sidebar {
     width: 20%;
@@ -62,12 +69,12 @@
     cursor: pointer;
   }
   
-  .header .user-icon {
+  /* .header .user-icon {
     background-color: purple;
     color: white;
     padding: 5px 10px;
     border-radius: 50%;
-  }
+  } */
   
   .content {
     flex: 1;
