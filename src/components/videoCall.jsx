@@ -8,8 +8,8 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-// const socket = io('https://webrtc-backend-vtyh.onrender.com');
-const socket = io('http://localhost:5000'); // Replace with your backend URL
+const socket = io('https://webrtc-backend-vtyh.onrender.com');
+// const socket = io('http://localhost:5000'); // Replace with your backend URL
 const VideoCall = () => {
   const [remoteStreams, setRemoteStreams] = useState([]);
   const [ismicOff, setIsmicOff] = useState(true);
@@ -31,7 +31,7 @@ const VideoCall = () => {
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream; // Attach stream to video element
         }
-        localVideoRef.current.srcObject = stream;
+        // localVideoRef.current.srcObject = stream;
 
         // Join the room
         socket.emit('join-room', roomId);
@@ -125,59 +125,63 @@ const VideoCall = () => {
   };
   const handleMic = () => {
     if (localStreamRef.current) {
-      console.log(localStreamRef.current);
+      const audioTrack = localStreamRef.current.getAudioTracks()[0]
+      audioTrack.enabled = !audioTrack.enabled; // Toggle audio track
+      setIsmicOff(!ismicOff);
+    };
 
-      localStreamRef.current.getAudioTracks().forEach((track) => {
-        track.enabled = !track.enabled; // Toggle audio track
-      });
-    }
-    setIsmicOff(!ismicOff);
-  };
+  }
+    const handleVideo = () => {
+      if (localStreamRef.current) {
+        const videoTrack = localStreamRef.current.getVideoTracks()[0]
+        videoTrack.enabled = !videoTrack.enabled; // Toggle video track
+        setIsVideoOff(!isVideoOff);
+      } // Update state
+    };
+    const handleEndCall = () => {
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+      socket.emit('leave-room', roomId);
+      navigate('/meeting');
+    };
 
-  const handleVideo = () => {
-    console.log(localVideoRef);
-    
-    if (localVideoRef.current) { // localStream is your MediaStream object
-      localVideoRef.current.active = isVideoOff
-    }
-    setIsVideoOff(!isVideoOff); // Update state
-  };
-
-  return (
-    <div className="maincontainer3">
-      <div className='callInterface'>
-        <div className="vid-main-content">
-          <div class="app-main">
-            <div class="video-call-wrapper" style={remoteStreams.length === 0 ? { justifyContent: "center" } : {}} >
-              <div class="video-participant" >
-                <video ref={localVideoRef} autoPlay playsInline muted className={remoteStreams.length === 0 ? "local-video" : "remote-video"} />
-              </div>
-              {remoteStreams.map(({ userId, stream }) => (
-                <div class="video-participant">
-                  <video
-                    key={userId}
-                    ref={ref => {
-                      if (ref) ref.srcObject = stream;
-                    }}
-                    autoPlay
-                    playsInline
-                    className="remote-video"
-                  />
+    return (
+      <div className="maincontainer3">
+        <div className='callInterface'>
+          <div className="vid-main-content">
+            <div class="app-main">
+              <div class="video-call-wrapper" style={remoteStreams.length === 0 ? { justifyContent: "center" } : {}} >
+                <div class="video-participant" >
+                  <video ref={localVideoRef} autoPlay playsInline muted className={remoteStreams.length === 0 ? "local-video" : "remote-video"} />
                 </div>
-              ))}
+                {remoteStreams.map(({ userId, stream }) => (
+                  <div class="video-participant">
+                    <video
+                      key={userId}
+                      ref={ref => {
+                        if (ref) ref.srcObject = stream;
+                      }}
+                      autoPlay
+                      playsInline
+                      className="remote-video"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="footer-icons">
+              <div id="micButton" class="footer-icon" onClick={handleMic}>{ismicOff ? <MicIcon /> : <MicOffIcon />}</div>
+              <div id="videoButton" class="footer-icon" onClick={handleVideo}>{isVideoOff ? <VideocamIcon /> : <VideocamOffIcon />}</div>
+              <div id="endCallButton" class="footer-icon red" onClick={handleEndCall}><CallEndIcon /></div>
             </div>
           </div>
         </div>
-        <div class="footer">
-          <div class="footer-icons">
-            <div id="micButton" class="footer-icon" onClick={handleMic}>{ismicOff ? <MicIcon /> : <MicOffIcon />}</div>
-            <div id="videoButton" class="footer-icon" onClick={handleVideo}>{isVideoOff ? <VideocamIcon /> : <VideocamOffIcon />}</div>
-            <div id="endCallButton" class="footer-icon red"><CallEndIcon /></div>
-          </div>
-        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
+
 
 export default VideoCall;
