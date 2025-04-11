@@ -6,31 +6,12 @@ import MeetingPage from "./components/meetings"; // Import the MeetingPage
 import VideoCall from "./components/videoCall";
 import { useLogin } from "./context/loginContext"; // Corrected import
 import "./index.css";
-
+import AppRoutes from "./router";
 const App = () => {
-  const { isAuthenticated } = useLogin(); // Access authentication state from context
+ 
 
   return (
-    <Router>
-      <Routes>
-        {/* Redirect root to /login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-
-        {/* Public routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-
-        {/* Protected routes */}
-        <Route
-          path="/meeting"
-          element={true ? <MeetingPage /> : <Navigate to="/login" replace />}
-        />
-        <Route
-          path="/videoCall/:roomId"
-          element={true ? <VideoCall /> : <Navigate to="/login" replace />}
-        />
-      </Routes>
-    </Router>
+    <AppRoutes/>
   );
 };
 
