@@ -49,7 +49,19 @@ const LandingPage = () => {
         </Typography>
 
         <Typography variant="h6" color="text.secondary" paragraph>
-          Syncora brings teams together with seamless video meetings and instant
+          <Box
+            component="span"
+            sx={{
+              fontWeight: 700,
+              fontSize: "1.5rem",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Syncora
+          </Box>{" "}
+          brings teams together with seamless video meetings and instant
           messaging — all in one powerful platform.
         </Typography>
 
