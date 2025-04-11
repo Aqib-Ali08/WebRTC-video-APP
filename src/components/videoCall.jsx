@@ -9,8 +9,8 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import { useLogin } from "../context/loginContext.jsx";
-const socket = io('https://webrtc-backend-vtyh.onrender.com');
-// const socket = io('http://localhost:5000'); // Replace with your backend URL
+// const socket = io('https://webrtc-backend-vtyh.onrender.com');
+const socket = io('http://localhost:5000'); // Replace with your backend URL
 const VideoCall = () => {
   const [remoteStreams, setRemoteStreams] = useState([]);
   const [ismicOff, setIsmicOff] = useState(true);
@@ -177,8 +177,8 @@ const VideoCall = () => {
   };
   const fetchUserDetails = async () => {
     try {
-      const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/users", {
-        // const response = await fetch("http://localhost:5000/api/auth/users", {
+      // const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/users", {
+        const response = await fetch("http://localhost:5000/api/auth/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

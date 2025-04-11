@@ -4,9 +4,9 @@ import io from 'socket.io-client';
 import '../assets/meeting.css';
 import meetingBGImg from '../assets/metting1.png';
 import { useLogin } from "../context/loginContext.jsx";
-const socket = io('https://webrtc-backend-vtyh.onrender.com');
+// const socket = io('https://webrtc-backend-vtyh.onrender.com');
 
-// const socket = io('http://localhost:5000');
+const socket = io('http://localhost:5000');
 const MeetingPage = () => {
   const [currentTime, setCurrentTime] = useState('');
   const [roomCode, setRoomCode] = useState('');
@@ -37,8 +37,8 @@ const MeetingPage = () => {
   };
   const fetchUserDetails = async() => {
     try {
-      const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/users", {
-      // const response = await fetch("http://localhost:5000/api/auth/users", {
+      // const response = await fetch("https://webrtc-backend-vtyh.onrender.com/api/auth/users", {
+      const response = await fetch("http://localhost:5000/api/auth/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
