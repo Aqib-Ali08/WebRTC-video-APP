@@ -28,35 +28,53 @@ const theme = createTheme({
 
     typography: {
         fontFamily: `'Poppins', sans-serif`,
+        fontSize: 16, // base font size
+
         h1: {
             fontWeight: 700,
-            fontSize: '3rem',
+            fontSize: '3rem', // 48px
+            lineHeight: 1.2,
         },
         h2: {
             fontWeight: 600,
-            fontSize: '2.25rem',
+            fontSize: '2.4rem', // 38.4px
+            lineHeight: 1.3,
         },
         h3: {
             fontWeight: 600,
-            fontSize: '1.875rem',
+            fontSize: '1.92rem', // 30.7px
+            lineHeight: 1.35,
         },
         h4: {
             fontWeight: 600,
-            fontSize: '1.5rem',
+            fontSize: '1.54rem', // 24.6px
+            lineHeight: 1.4,
         },
         h5: {
             fontWeight: 500,
-            fontSize: '1.25rem',
+            fontSize: '1.23rem', // 19.7px
+            lineHeight: 1.45,
         },
         h6: {
             fontWeight: 500,
-            fontSize: '1rem',
+            fontSize: '1rem', // 16px
+            lineHeight: 1.5,
         },
         body1: {
-            fontSize: '1rem',
+            fontSize: '1rem', // 16px
+            fontWeight: 400,
+            lineHeight: 1.6,
         },
         body2: {
-            fontSize: '0.875rem',
+            fontSize: '0.875rem', // 14px
+            fontWeight: 400,
+            lineHeight: 1.6,
+        },
+        caption: {
+            fontSize: '0.75rem', // 12px
+            fontWeight: 400,
+            color: '#6B7280',
+            lineHeight: 1.4,
         },
     },
 

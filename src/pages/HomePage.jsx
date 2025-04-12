@@ -44,17 +44,17 @@ const scheduleShortcuts = [
 const HomePage = () => {
   const [value, setValue] = useState(new Date())
   return (
-    <Box p={4}>
+    <Box p={3}>
       {/* Header */}
-      <Typography variant="h4" fontWeight={600} mb={2}>
+      <Typography variant="h4" fontWeight={600} mb={1.5}>
         Welcome Back, User 👋
       </Typography>
-      <Typography variant="body1" color="text.secondary" mb={4}>
+      <Typography variant="body1" color="text.secondary" mb={3}>
         Here's an overview of your activity.
       </Typography>
 
       {/* Quick Actions */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={4}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <Button variant="contained" startIcon={<Icon icon="material-symbols:add-circle-outline-rounded" />}>
           Create Meeting
         </Button>

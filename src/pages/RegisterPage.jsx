@@ -16,7 +16,7 @@ import registerSVG from "../assets/register.svg";
 import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
-  const navigate= useNavigate()
+  const navigate = useNavigate();
   const initialValues = {
     name: "",
     email: "",
@@ -80,11 +80,11 @@ const RegisterPage = () => {
               variant="h4"
               fontWeight={600}
               mb={2}
-              fontFamily="Poppins"
+          
             >
               Create Account
             </Typography>
-            <Typography mb={3} fontFamily="Questrial">
+            <Typography mb={3} >
               Sign up to get started
             </Typography>
 
@@ -136,10 +136,26 @@ const RegisterPage = () => {
                   />
 
                   <FormControlLabel
-                    control={<Checkbox />}
+                    control={
+                      <Checkbox
+                        size="small"
+                        sx={{
+                          padding: 0,
+                          "& .MuiSvgIcon-root": {
+                            fontSize: 18,
+                          },
+                        }}
+                      />
+                    }
                     label="I agree to the Terms & Conditions"
+                    sx={{
+                      marginLeft: 0,
+                      "& .MuiFormControlLabel-label": {
+                        fontSize: "12px",
+                      },
+                      gap: "4px", // optional: reduce space between checkbox and label
+                    }}
                   />
-
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -163,12 +179,7 @@ const RegisterPage = () => {
                     </Button>
                   </motion.div>
 
-                  <Typography
-                    variant="body2"
-                    textAlign="center"
-                    mt={2}
-                    fontFamily="Questrial"
-                  >
+                  <Typography variant="body2" textAlign="center" mt={2}>
                     Already have an account?{" "}
                     <Box
                       component="span"

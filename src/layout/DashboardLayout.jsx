@@ -7,7 +7,7 @@ const DashboardLayout = () => {
   return (
     <Box display="flex">
       <Sidebar />
-      <Box flex={1} p={3}>
+      <Box flex={1} p={3} minHeight={"100vh"}>
         <Outlet />
       </Box>
     </Box>

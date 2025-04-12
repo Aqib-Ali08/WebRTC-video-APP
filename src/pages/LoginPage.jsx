@@ -90,12 +90,34 @@ const LoginPage = () => {
                     component="div"
                     style={{ color: "red", fontSize: "12px" }}
                   />
-
-                  <FormControlLabel
-                    control={<Checkbox />}
-                    label="Remember me"
-                  />
-
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
+                          sx={{
+                            padding: 0,
+                            "& .MuiSvgIcon-root": {
+                              fontSize: 18,
+                            },
+                          }}
+                        />
+                      }
+                      label="Remember me"
+                      sx={{
+                        marginLeft: 0,
+                        "& .MuiFormControlLabel-label": {
+                          fontSize: "12px",
+                        },
+                        gap: "4px", // optional: reduce space between checkbox and label
+                      }}
+                    />
+                    <Typography sx={{ fontSize: "12px",color:"blue" }}>
+                      forget password?
+                    </Typography>
+                  </Box>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
