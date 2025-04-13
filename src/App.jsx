@@ -1,17 +1,26 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./components/Login";
-import Signup from "./components/Signup";
-import MeetingPage from "./components/meetings"; // Import the MeetingPage
-import VideoCall from "./components/videoCall";
-import { useLogin } from "./context/loginContext"; // Corrected import
 import "./index.css";
 import AppRoutes from "./router";
-const App = () => {
- 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+const App = () => {
   return (
-    <AppRoutes/>
+    <>
+      <AppRoutes />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+    </>
   );
 };
 

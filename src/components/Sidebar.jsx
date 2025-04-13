@@ -85,7 +85,7 @@ const Sidebar = () => {
         }}
       >
         {navItems.map((item, index) => (
-          <Tooltip title={item.label} placement="right">
+          <Tooltip key={index} title={item.label} placement="right">
             <Tab
               icon={
                 <Icon

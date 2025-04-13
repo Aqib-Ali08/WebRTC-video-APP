@@ -16,13 +16,30 @@ import {
   Stack,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import { useDispatch } from "react-redux";
+import { showToast } from "../redux/slices/appSlice";
 
 const analyticsData = [
-  { title: "Total Meetings", value: "24", icon: "material-symbols:video-call-outline", color: "#6366F1" },
-  { title: "Active Chats", value: "8", icon: "material-symbols:chat-bubble-outline", color: "#38BDF8" },
-  { title: "Users Online", value: "5", icon: "material-symbols:person-outline", color: "#10B981" },
+  {
+    title: "Total Meetings",
+    value: "24",
+    icon: "material-symbols:video-call-outline",
+    color: "#6366F1",
+  },
+  {
+    title: "Active Chats",
+    value: "8",
+    icon: "material-symbols:chat-bubble-outline",
+    color: "#38BDF8",
+  },
+  {
+    title: "Users Online",
+    value: "5",
+    icon: "material-symbols:person-outline",
+    color: "#10B981",
+  },
 ];
 
 const upcomingMeetings = [
@@ -42,12 +59,14 @@ const scheduleShortcuts = [
 ];
 
 const HomePage = () => {
-  const [value, setValue] = useState(new Date())
+  const dispatch = useDispatch()
+  const [value, setValue] = useState(new Date());
+
   return (
     <Box p={3}>
       {/* Header */}
       <Typography variant="h4" fontWeight={600} mb={1.5}>
-        Welcome Back, User 👋
+        Welcome Back, User 👋 
       </Typography>
       <Typography variant="body1" color="text.secondary" mb={3}>
         Here's an overview of your activity.
@@ -55,10 +74,18 @@ const HomePage = () => {
 
       {/* Quick Actions */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
-        <Button variant="contained" startIcon={<Icon icon="material-symbols:add-circle-outline-rounded" />}>
+        <Button
+          variant="contained"
+          startIcon={
+            <Icon icon="material-symbols:add-circle-outline-rounded" />
+          }
+        >
           Create Meeting
         </Button>
-        <Button variant="outlined" startIcon={<Icon icon="material-symbols:chat-add-on-outline" />}>
+        <Button
+          variant="outlined"
+          startIcon={<Icon icon="material-symbols:chat-add-on-outline" />}
+        >
           New Chat
         </Button>
       </Stack>
@@ -89,9 +116,18 @@ const HomePage = () => {
         {/* Upcoming Meetings */}
         <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
               <Typography variant="h6">Upcoming Meetings</Typography>
-              <Icon icon="material-symbols:calendar-month" width="24" color="#6366F1" />
+              <Icon
+                icon="material-symbols:calendar-month"
+                width="24"
+                color="#6366F1"
+              />
             </Box>
 
             {upcomingMeetings.map((meeting, index) => (
@@ -112,7 +148,12 @@ const HomePage = () => {
         {/* Recent Chats */}
         <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
               <Typography variant="h6">Recent Chats</Typography>
               <Icon icon="material-symbols:chat" width="24" color="#6366F1" />
             </Box>
@@ -137,9 +178,18 @@ const HomePage = () => {
         {/* Schedule Shortcuts */}
         <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
               <Typography variant="h6">Schedule Shortcuts</Typography>
-              <Icon icon="material-symbols:bolt-outline" width="24" color="#6366F1" />
+              <Icon
+                icon="material-symbols:bolt-outline"
+                width="24"
+                color="#6366F1"
+              />
             </Box>
 
             <Stack spacing={2}>
