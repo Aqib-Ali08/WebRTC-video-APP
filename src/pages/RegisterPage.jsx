@@ -14,25 +14,44 @@ import * as Yup from "yup";
 import { motion } from "framer-motion";
 import registerSVG from "../assets/register.svg";
 import { useNavigate } from "react-router-dom";
+import { handleRegister } from "../services";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+
   const initialValues = {
     name: "",
-    email: "",
+    username: "",
     password: "",
+    confirmPassword: "",
   };
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
+    username: Yup.string().required("Username is required"),
     password: Yup.string()
       .min(6, "Minimum 6 characters")
       .required("Password is required"),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref("password"), null], "Passwords must match")
+      .required("Please confirm your password"),
   });
 
-  const handleSubmit = (values) => {
-    console.log(values);
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const { name, username, password } = values;
+      const result = await handleRegister(name, username, password);
+      console.log("Registration successful:", result);
+      navigate("/login"); // Navigate after successful registration
+    } catch (error) {
+      console.error(
+        "Registration failed:",
+        error.response?.data || error.message
+      );
+      // Optionally show a user-friendly error toast/message here
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -76,17 +95,10 @@ const RegisterPage = () => {
           }}
         >
           <Box width="100%" maxWidth="400px">
-            <Typography
-              variant="h4"
-              fontWeight={600}
-              mb={2}
-          
-            >
+            <Typography variant="h4" fontWeight={600} mb={2}>
               Create Account
             </Typography>
-            <Typography mb={3} >
-              Sign up to get started
-            </Typography>
+            <Typography mb={3}>Sign up to get started</Typography>
 
             <Formik
               initialValues={initialValues}
@@ -111,12 +123,12 @@ const RegisterPage = () => {
                   <Field
                     as={TextField}
                     fullWidth
-                    label="Email address"
-                    name="email"
+                    label="Username"
+                    name="username"
                     margin="normal"
                   />
                   <ErrorMessage
-                    name="email"
+                    name="username"
                     component="div"
                     style={{ color: "red", fontSize: "12px" }}
                   />
@@ -131,6 +143,20 @@ const RegisterPage = () => {
                   />
                   <ErrorMessage
                     name="password"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+
+                  <Field
+                    as={TextField}
+                    fullWidth
+                    label="Confirm Password"
+                    type="password"
+                    name="confirmPassword"
+                    margin="normal"
+                  />
+                  <ErrorMessage
+                    name="confirmPassword"
                     component="div"
                     style={{ color: "red", fontSize: "12px" }}
                   />
@@ -153,9 +179,10 @@ const RegisterPage = () => {
                       "& .MuiFormControlLabel-label": {
                         fontSize: "12px",
                       },
-                      gap: "4px", // optional: reduce space between checkbox and label
+                      gap: "4px",
                     }}
                   />
+
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

@@ -1,5 +1,3 @@
-// src/pages/LoginPage.jsx
-
 import {
   Box,
   Button,
@@ -13,23 +11,46 @@ import * as Yup from "yup";
 import loginSVG from "../assets/login.svg";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { handleLogin } from "../services";
+import { loginSuccess } from "../redux/slices/authSlice";
 
 const LoginPage = () => {
+  const [rememberMe, setRememberMe] = useState(false);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const initialValues = {
-    email: "",
+    username: "",
     password: "",
   };
 
   const validationSchema = Yup.object({
-    email: Yup.string().email("Invalid email").required("Email is required"),
+    username: Yup.string().required("Username is required"),
     password: Yup.string()
       .min(6, "Minimum 6 characters")
       .required("Password is required"),
   });
 
-  const handleSubmit = (values) => {
-    console.log(values);
+  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+    try {
+      const data = await handleLogin(values.username, values.password);
+      dispatch(
+        loginSuccess({
+          user: data.user,
+          token: data.token,
+          refreshToken: data.refreshToken,
+          expiresAt: data.expiresAt,
+          rememberMe,
+        })
+      );
+      navigate("/dashboard/home");
+    } catch (error) {
+      console.error("Login failed:", error);
+      setErrors({ password: "Invalid credentials" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -67,12 +88,12 @@ const LoginPage = () => {
                   <Field
                     as={TextField}
                     fullWidth
-                    label="Email address"
-                    name="email"
+                    label="Username"
+                    name="username"
                     margin="normal"
                   />
                   <ErrorMessage
-                    name="email"
+                    name="username"
                     component="div"
                     style={{ color: "red", fontSize: "12px" }}
                   />
@@ -90,6 +111,7 @@ const LoginPage = () => {
                     component="div"
                     style={{ color: "red", fontSize: "12px" }}
                   />
+
                   <Box
                     sx={{ display: "flex", justifyContent: "space-between" }}
                   >
@@ -97,6 +119,8 @@ const LoginPage = () => {
                       control={
                         <Checkbox
                           size="small"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
                           sx={{
                             padding: 0,
                             "& .MuiSvgIcon-root": {
@@ -111,13 +135,15 @@ const LoginPage = () => {
                         "& .MuiFormControlLabel-label": {
                           fontSize: "12px",
                         },
-                        gap: "4px", // optional: reduce space between checkbox and label
+                        gap: "4px",
                       }}
                     />
-                    <Typography sx={{ fontSize: "12px",color:"blue" }}>
+
+                    <Typography sx={{ fontSize: "12px", color: "blue" }}>
                       forget password?
                     </Typography>
                   </Box>
+
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
