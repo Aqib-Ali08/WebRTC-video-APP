@@ -14,6 +14,7 @@ import {
   ListItemAvatar,
   ListItemText,
   Stack,
+  IconButton,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import Calendar from "react-calendar";
@@ -59,19 +60,28 @@ const scheduleShortcuts = [
 ];
 
 const HomePage = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [value, setValue] = useState(new Date());
 
   return (
     <Box p={3}>
       {/* Header */}
-      <Typography variant="h4" fontWeight={600} mb={1.5}>
-        Welcome Back, User 👋 
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Box>
+          <Typography variant="h4" fontWeight={600} mb={1.5}>
+            Welcome Back, User 👋
+          </Typography>
+        </Box>
+      </Box>
       <Typography variant="body1" color="text.secondary" mb={3}>
         Here's an overview of your activity.
       </Typography>
-
       {/* Quick Actions */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <Button
@@ -83,10 +93,16 @@ const HomePage = () => {
           Create Meeting
         </Button>
         <Button
-          variant="outlined"
+          variant="contained"
           startIcon={<Icon icon="material-symbols:chat-add-on-outline" />}
         >
           New Chat
+        </Button>
+        <Button
+           variant="contained"
+          startIcon={<Icon icon="basil:user-plus-solid" />}
+        >
+          Add New Connections
         </Button>
       </Stack>
 

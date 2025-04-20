@@ -25,6 +25,7 @@ import SettingsPage from "./pages/SettingsPage";
 import { selectAuthData } from "./redux/slices/authSlice";
 import { useSelector } from "react-redux";
 import ProtectedRoute from "./layout/ProtectedRoute";
+import Connections from "./pages/Connections";
 
 const AppRoutes = () => {
   const { token, expiresAt } = useSelector(selectAuthData);
@@ -57,6 +58,7 @@ const AppRoutes = () => {
           <Route element={<DashboardLayout />}>
             <Route index element={<Navigate to="home" />} />
             <Route path="home" element={<HomePage />} />
+            <Route path="connections" element={<Connections />} />
             <Route path="meetings" element={<MeetingListPage />} />
             <Route path="meeting/:meetingId" element={<MeetingRoomPage />} />
             <Route path="schedule" element={<ScheduleMeetingPage />} />

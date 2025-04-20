@@ -9,6 +9,11 @@ import { Icon } from "@iconify/react";
 const navItems = [
   { path: "/dashboard/home", label: "Home", icon: "material-symbols:home" },
   {
+    path: "/dashboard/connections",
+    label: "Connections",
+    icon: "basil:user-plus-solid",
+  },
+  {
     path: "/dashboard/meetings",
     label: "Meetings",
     icon: "material-symbols:calendar-month",
