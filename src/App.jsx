@@ -3,6 +3,15 @@ import "./index.css";
 import AppRoutes from "./router";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { io } from "socket.io-client";
+import { getTokenFromLocalStorage } from "./services";
+
+const token = getTokenFromLocalStorage();
+const socket = io(import.meta.env.VITE_SERVER_URL || "http://localhost:3000", {
+  auth: {
+    token: token,
+  },
+});
 
 const App = () => {
   return (

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Avatar, Typography, Button, Paper } from "@mui/material";
 
-const ConnectionCard = ({ name, image, type = "request", onAction }) => {
+const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
   const renderButtons = () => {
     switch (type) {
       case "request":
@@ -11,7 +11,7 @@ const ConnectionCard = ({ name, image, type = "request", onAction }) => {
               variant="contained"
               size="small"
               sx={actionBtnStyles("primary")}
-              onClick={() => onAction("accept")}
+              onClick={() => {onAction(id, "accept")}}
             >
               Accept
             </Button>
@@ -19,7 +19,7 @@ const ConnectionCard = ({ name, image, type = "request", onAction }) => {
               variant="outlined"
               size="small"
               sx={actionBtnStyles("secondary")}
-              onClick={() => onAction("delete")}
+              onClick={() => onAction(id, "delete")}
             >
               Delete
             </Button>
@@ -31,7 +31,7 @@ const ConnectionCard = ({ name, image, type = "request", onAction }) => {
             variant="contained"
             size="small"
             sx={actionBtnStyles("primary")}
-            onClick={() => onAction("add")}
+            onClick={() => onAction(id, "add")}
           >
             Add Friend
           </Button>
@@ -43,7 +43,7 @@ const ConnectionCard = ({ name, image, type = "request", onAction }) => {
               variant="outlined"
               size="small"
               sx={actionBtnStyles("secondary")}
-              onClick={() => onAction("delete")}
+              onClick={() => onAction(id, "delete")}
             >
               Delete
             </Button>
@@ -52,7 +52,7 @@ const ConnectionCard = ({ name, image, type = "request", onAction }) => {
               color="error"
               size="small"
               sx={actionBtnStyles("error")}
-              onClick={() => onAction("block")}
+              onClick={() => onAction(id,"block")}
             >
               Block
             </Button>

@@ -24,19 +24,17 @@ import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import { selectAuthData } from "./redux/slices/authSlice";
 import { useSelector } from "react-redux";
-import ProtectedRoute from "./layout/ProtectedRoute";
+import ProtectedRoute, { getAuthData } from "./layout/ProtectedRoute";
 import Connections from "./pages/Connections";
 
 const AppRoutes = () => {
-  const { token, expiresAt } = useSelector(selectAuthData);
+  const { token, expiresAt } = getAuthData();
 
-  const isTokenValid =
-    token && expiresAt && new Date().getTime() < new Date(expiresAt).getTime();
-
+  const isTokenValid = token && expiresAt && new Date().getTime() < expiresAt;
+  console.log("isTokenValid", isTokenValid);
   return (
     <Router>
       <Routes>
-   
         <Route
           path="/"
           element={
@@ -69,7 +67,6 @@ const AppRoutes = () => {
           </Route>
         </Route>
 
-      
         <Route path="/error" element={<ErrorPage />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
