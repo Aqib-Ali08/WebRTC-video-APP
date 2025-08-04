@@ -11,8 +11,9 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import ConnectionCard from "../components/ConnectionCard";
-import { handleActionAccept, handleActionAdd, handleActionBlock, handleActionCancel, handleGetUsers } from "../services";
+import { getCurrentUserId, handleActionAccept, handleActionAdd, handleActionBlock, handleActionCancel, handleGetUsers } from "../services";
 import Loader from "../components/Loader";
+import socket from "../config/socketClient";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -78,7 +79,7 @@ export default function Connections() {
     getUser();
   }, []);
   const handleAction = async (ID, actionType) => {
-    console.log("payloadID",ID)
+    console.log("payloadID", ID)
     try {
       switch (actionType) {
         case "accept":
@@ -88,9 +89,19 @@ export default function Connections() {
         case "delete":
           await handleActionCancel(ID)
           break;
-
         case "add":
-          await handleActionAdd(ID);
+          try {
+            const response = await handleActionAdd(ID);
+            if (response)
+              socket.emit("friend:requestSent", {
+                toUserId: ID,
+                fromUserId: getCurrentUserId(),
+                message: "You have a new friend request!",
+              });
+
+          } catch (err) {
+            console.error("Friend request failed:", err);
+          }
           break;
 
         case "block":

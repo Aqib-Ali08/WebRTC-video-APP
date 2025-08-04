@@ -1,6 +1,11 @@
 import axios from "axios";
+import { jwtDecode } from 'jwt-decode';
 
-const domain = "https://webrtc-backend-1ipj.onrender.com/api/v1";
+// const domain = "https://webrtc-backend-1ipj.onrender.com/api/v1";
+const domain = "http://localhost:3000/api/v1";
+
+
+
 
 export function getTokenFromLocalStorage() {
   const authData =
@@ -16,7 +21,19 @@ export function getTokenFromLocalStorage() {
     return null;
   }
 }
+export const getCurrentUserId = () => {
+  try {
+    const token = getTokenFromLocalStorage()
+    if (!token) return null;
 
+    const decoded = jwtDecode(token);
+    console.log(decoded)
+    return decoded.id || decoded.userId || null;
+  } catch (error) {
+    console.error("Invalid token:", error);
+    return null;
+  }
+};
 export const handleLogin = async (username, password) => {
   try {
     const response = await axios.post(`${domain}/auth/login`, {
@@ -63,7 +80,7 @@ export const handleGetUsers = async (refreshToken) => {
   try {
     const token = getTokenFromLocalStorage();
 
-    const response = await axios.get(`${domain}/users`, {
+    const response = await axios.get(`${domain}/users/getAllUsers`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
