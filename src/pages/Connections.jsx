@@ -92,6 +92,7 @@ export default function Connections() {
         case "add":
           try {
             const response = await handleActionAdd(ID);
+            console.log(response);
             if (response)
               socket.emit("friend:requestSent", {
                 toUserId: ID,
