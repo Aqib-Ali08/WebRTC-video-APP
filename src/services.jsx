@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from 'jwt-decode';
 
 // const domain = "https://webrtc-backend-1ipj.onrender.com/api/v1";
-const domain = "http://localhost:3000/api/v1";
+const domain = "https://webrtc-backend-xmll.onrender.com/api/v1";
 
 
 
