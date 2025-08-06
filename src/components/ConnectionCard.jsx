@@ -1,4 +1,4 @@
-import React from "react";
+import { Add } from "@mui/icons-material";
 import { Box, Avatar, Typography, Button, Paper } from "@mui/material";
 
 const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
@@ -11,7 +11,9 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
               variant="contained"
               size="small"
               sx={actionBtnStyles("primary")}
-              onClick={() => {onAction(id, "accept")}}
+              onClick={() => {
+                onAction(id, "accept");
+              }}
             >
               Accept
             </Button>
@@ -32,6 +34,7 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
             size="small"
             sx={actionBtnStyles("primary")}
             onClick={() => onAction(id, "add")}
+            startIcon={<Add />}
           >
             Add Friend
           </Button>
@@ -52,7 +55,7 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
               color="error"
               size="small"
               sx={actionBtnStyles("error")}
-              onClick={() => onAction(id,"block")}
+              onClick={() => onAction(id, "block")}
             >
               Block
             </Button>
@@ -69,9 +72,9 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
       sx={{
         borderRadius: 1,
         px: 3,
-        py: 2,
+        py: 1.5,
         width: "100%",
-        maxWidth: 800,
+        maxWidth: 1000,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -86,9 +89,9 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
         <Avatar
           src={image}
           alt={name}
-          sx={{ width: 48, height: 48, bgcolor: "#d1d9ff" }}
+          sx={{ width: 40, height: 40, bgcolor: "#d1d9ff" }}
         />
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography sx={{ fontSize: "16px" }} fontWeight={600}>
           {name}
         </Typography>
       </Box>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import "./index.css";
 import AppRoutes from "./router";
 import { ToastContainer } from "react-toastify";
@@ -7,7 +7,9 @@ import { io } from "socket.io-client";
 import { getTokenFromLocalStorage } from "./services";
 import { showToast } from "./redux/slices/appSlice";
 import { useDispatch } from "react-redux";
-import socket from "./config/socketClient";
+import { getSocket } from "./config/socketClient";
+import { SocketProvider, useSocket } from "./context/socketContext";
+import MainApp from "./MainApp";
 
 // const socket = io(import.meta.env.VITE_SERVER_URL || "http://localhost:3000", {
 //   auth: {
@@ -15,38 +17,25 @@ import socket from "./config/socketClient";
 //   },
 // });
 
-
-
 const App = () => {
-  const dispatch = useDispatch()
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("notify", (data) => {
-      console.log(data)
-      const message = data.message || "🔔 You have a new notification!";
-      const type = data.type === "FRIEND_REQUEST" ? "info" : "success";
-
-      dispatch(showToast(message, type));
-    });
-
-  }, []);
 
   return (
     <>
-      <AppRoutes />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
+      <SocketProvider>
+        <MainApp />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+      </SocketProvider>
     </>
   );
 };

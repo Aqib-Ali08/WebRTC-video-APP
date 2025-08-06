@@ -1,6 +1,4 @@
 // src/pages/RegisterPage.jsx
-
-import React from "react";
 import {
   Box,
   Button,
@@ -15,9 +13,17 @@ import { motion } from "framer-motion";
 import registerSVG from "../assets/register.svg";
 import { useNavigate } from "react-router-dom";
 import { handleRegister } from "../services";
+import register from "../assets/Register.json";
+import Lottie from "lottie-react";
+import { useState } from "react";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const initialValues = {
     name: "",
@@ -54,13 +60,23 @@ const RegisterPage = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.target.value === "Enter") {
+      handleSubmit();
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Box display="flex" height="100vh">
+      <Box display="flex" height="100vh" sx={{ overflow: "hidden" }}>
         {/* Left Side - SVG */}
         <motion.div
           initial={{ x: -100, opacity: 0 }}
@@ -74,11 +90,12 @@ const RegisterPage = () => {
             backgroundColor: "#f9fafb",
           }}
         >
-          <img
+          {/* <img
             src={registerSVG}
             alt="Register Illustration"
             style={{ width: "80%", maxWidth: "500px" }}
-          />
+          /> */}
+          <Lottie animationData={register} loop={true} />
         </motion.div>
 
         {/* Right Side - Form */}
@@ -95,10 +112,10 @@ const RegisterPage = () => {
           }}
         >
           <Box width="100%" maxWidth="400px">
-            <Typography variant="h4" fontWeight={600} mb={2}>
+            <Typography variant="h4" fontWeight={600}>
               Create Account
             </Typography>
-            <Typography mb={3}>Sign up to get started</Typography>
+            <Typography>Sign up to get started</Typography>
 
             <Formik
               initialValues={initialValues}
@@ -110,8 +127,9 @@ const RegisterPage = () => {
                   <Field
                     as={TextField}
                     fullWidth
-                    label="Full Name"
-                    name="name"
+                    label="Username"
+                    name="username"
+                    placeholder="John Doe"
                     margin="normal"
                   />
                   <ErrorMessage
@@ -123,12 +141,13 @@ const RegisterPage = () => {
                   <Field
                     as={TextField}
                     fullWidth
-                    label="Username"
-                    name="username"
+                    label="Email"
+                    placeholder="john@example.com"
+                    name="email"
                     margin="normal"
                   />
                   <ErrorMessage
-                    name="username"
+                    name="email"
                     component="div"
                     style={{ color: "red", fontSize: "12px" }}
                   />
@@ -137,9 +156,22 @@ const RegisterPage = () => {
                     as={TextField}
                     fullWidth
                     label="Password"
-                    type="password"
+                    // type="password"
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     margin="normal"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={togglePasswordVisibility}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                   <ErrorMessage
                     name="password"
@@ -151,17 +183,30 @@ const RegisterPage = () => {
                     as={TextField}
                     fullWidth
                     label="Confirm Password"
-                    type="password"
+                    // type="password"
+                    type={showPassword ? "text" : "password"}
                     name="confirmPassword"
                     margin="normal"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={togglePasswordVisibility}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                   <ErrorMessage
                     name="confirmPassword"
                     component="div"
-                    style={{ color: "red", fontSize: "12px" }}
+                    style={{ color: "red", fontSize: "12px", mb: "10px" }}
                   />
 
-                  <FormControlLabel
+                  {/* <FormControlLabel
                     control={
                       <Checkbox
                         size="small"
@@ -181,9 +226,9 @@ const RegisterPage = () => {
                       },
                       gap: "4px",
                     }}
-                  />
+                  /> */}
 
-                  <motion.div
+                  {/* <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -204,6 +249,22 @@ const RegisterPage = () => {
                     >
                       Register
                     </Button>
+                  </motion.div> */}
+
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      fullWidth
+                      type="submit"
+                      variant="contained"
+                      sx={{ mt: 2 }}
+                      disabled={isSubmitting}
+                      onKeyDown={handleKeyPress}
+                    >
+                      Register
+                    </Button>
                   </motion.div>
 
                   <Typography variant="body2" textAlign="center" mt={2}>
@@ -218,7 +279,6 @@ const RegisterPage = () => {
                         display: "inline",
                         "&:hover": {
                           textDecoration: "underline",
-                          color: "#5a67d8",
                         },
                       }}
                     >

@@ -1,7 +1,5 @@
 // src/components/Sidebar.jsx
-
-import React from "react";
-import { Box, Tabs, Tab, Tooltip } from "@mui/material";
+import { Box, Tabs, Tab, Tooltip, Avatar } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
@@ -55,7 +53,8 @@ const Sidebar = () => {
       transition={{ duration: 0.4 }}
       style={{
         width: "80px",
-        height: "100vh",
+        // height: "100vh",
+        height: "auto",
         background: "#f9fafb",
         boxShadow: "2px 0 6px rgba(0,0,0,0.05)",
         padding: "1rem 0",
@@ -64,7 +63,7 @@ const Sidebar = () => {
         alignItems: "center",
       }}
     >
-      <Box
+      {/* <Box
         fontWeight={700}
         fontSize="1.3rem"
         mb={4}
@@ -72,7 +71,18 @@ const Sidebar = () => {
         onClick={() => navigate("/dashboard/home")}
       >
         S
-      </Box>
+      </Box> */}
+      <Tooltip title="John Doe">
+        <Avatar
+          sx={{
+            fontFamily: "Poppins",
+            backgroundColor: "#667eea",
+            cursor: "pointer",
+          }}
+        >
+          JD
+        </Avatar>
+      </Tooltip>
 
       <Tabs
         orientation="vertical"
@@ -80,7 +90,7 @@ const Sidebar = () => {
         onChange={(_, newValue) => navigate(navItems[newValue].path)}
         sx={{
           ".MuiTabs-flexContainer": {
-            marginTop:'3rem',
+            marginTop: "3rem",
             gap: "1rem",
           },
           ".MuiTabs-indicator": {
