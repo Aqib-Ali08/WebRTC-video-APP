@@ -10,7 +10,7 @@ const MainApp = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!socket) return;
+    if (socket) console.log("Socket is connected:", socket.id);
 
     socket.on("notify", (data) => {
       console.log(data);
@@ -31,4 +31,3 @@ const MainApp = () => {
 
 export default MainApp;
 
- 

@@ -7,7 +7,6 @@ import { io } from "socket.io-client";
 import { getTokenFromLocalStorage } from "./services";
 import { showToast } from "./redux/slices/appSlice";
 import { useDispatch } from "react-redux";
-import { getSocket } from "./config/socketClient";
 import { SocketProvider, useSocket } from "./context/socketContext";
 import MainApp from "./MainApp";
 

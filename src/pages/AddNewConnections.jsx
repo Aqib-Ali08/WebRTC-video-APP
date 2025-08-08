@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Box, CircularProgress, TablePagination } from "@mui/material";
 import ConnectionCard from "../components/ConnectionCard";
 import { handleGetUsers, handleActionAdd, getCurrentUserId } from "../services";
-import { getSocket } from "../config/socketClient";
 import { useSocket } from "../context/socketContext";
 
 const AddNewConnection = () => {
