@@ -9,6 +9,7 @@ import { showToast } from "./redux/slices/appSlice";
 import { useDispatch } from "react-redux";
 import { SocketProvider, useSocket } from "./context/socketContext";
 import MainApp from "./MainApp";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 // const socket = io(import.meta.env.VITE_SERVER_URL || "http://localhost:3000", {
 //   auth: {
@@ -17,24 +18,26 @@ import MainApp from "./MainApp";
 // });
 
 const App = () => {
-
+  const queryClient = new QueryClient();
   return (
     <>
-      <SocketProvider>
-        <MainApp />
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-        />
-      </SocketProvider>
+      <QueryClientProvider client={queryClient}>
+        <SocketProvider>
+          <MainApp />
+          <ToastContainer
+            position="bottom-left"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
+        </SocketProvider>
+      </QueryClientProvider>
     </>
   );
 };

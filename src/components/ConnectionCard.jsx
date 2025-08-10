@@ -1,7 +1,20 @@
-import { Add } from "@mui/icons-material";
+import { Add, Check } from "@mui/icons-material";
 import { Box, Avatar, Typography, Button, Paper } from "@mui/material";
 
-const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
+const ConnectionCard = ({
+  id,
+  name,
+  image,
+  type = "request",
+  onAction,
+  loadingAdd = false,
+  loadingAccept = false,
+  loadingDelete = false,
+  loadingBlock = false,
+  loadingDisconnect = false,
+  sentRequest = false,
+  isBlocked = false,
+}) => {
   const renderButtons = () => {
     switch (type) {
       case "request":
@@ -14,16 +27,18 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
               onClick={() => {
                 onAction(id, "accept");
               }}
+              disabled={loadingAccept}
             >
-              Accept
+              {loadingAccept ? "Accepting..." : "Accept"}
             </Button>
             <Button
               variant="outlined"
               size="small"
               sx={actionBtnStyles("secondary")}
-              onClick={() => onAction(id, "delete")}
+              onClick={() => onAction(id, "reject")}
+              disabled={loadingDelete}
             >
-              Delete
+              {loadingDelete ? "Rejecting..." : "Reject"}
             </Button>
           </>
         );
@@ -34,9 +49,14 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
             size="small"
             sx={actionBtnStyles("primary")}
             onClick={() => onAction(id, "add")}
-            startIcon={<Add />}
+            startIcon={sentRequest ? <Check /> : <Add />}
+            disabled={sentRequest || loadingAdd}
           >
-            Add Friend
+            {loadingAdd
+              ? "Sending..."
+              : sentRequest
+                ? "Request Sent"
+                : "Add Friend"}
           </Button>
         );
       case "manage":
@@ -46,18 +66,26 @@ const ConnectionCard = ({ id, name, image, type = "request", onAction }) => {
               variant="outlined"
               size="small"
               sx={actionBtnStyles("secondary")}
-              onClick={() => onAction(id, "delete")}
+              onClick={() => onAction(id, "remove")}
+              disabled={loadingDisconnect}
             >
-              Delete
+              {loadingDisconnect ? "Removing..." : "Remove"}
             </Button>
             <Button
               variant="contained"
               color="error"
               size="small"
               sx={actionBtnStyles("error")}
-              onClick={() => onAction(id, "block")}
+              onClick={() => onAction(id, isBlocked ? "UNBLOCK" : "BLOCK")}
+              disabled={loadingBlock}
             >
-              Block
+              {loadingBlock
+                ? isBlocked
+                  ? "Unblocking..."
+                  : "Blocking..."
+                : isBlocked
+                  ? "Unblock"
+                  : "Block"}
             </Button>
           </>
         );
@@ -111,6 +139,10 @@ const actionBtnStyles = (variant) => ({
     color: "#fff",
     "&:hover": {
       background: "linear-gradient(to right, #5b4de1, #7d64e6)",
+    },
+    "&.Mui-disabled": {
+      background: "#ccc",
+      color: "green",
     },
   }),
   ...(variant === "secondary" && {

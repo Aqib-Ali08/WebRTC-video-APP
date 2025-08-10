@@ -1,6 +1,6 @@
 // src/pages/HomePage.jsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -21,13 +21,14 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useDispatch } from "react-redux";
 import { showToast } from "../redux/slices/appSlice";
+import { useNavigate } from "react-router-dom";
 
 const analyticsData = [
   {
     title: "Total Meetings",
     value: "24",
     icon: "material-symbols:video-call-outline",
-    color: "#6366F1",
+    color: "#c026d3",
   },
   {
     title: "Active Chats",
@@ -60,8 +61,27 @@ const scheduleShortcuts = [
 ];
 
 const HomePage = () => {
-  const dispatch = useDispatch();
-  const [value, setValue] = useState(new Date());
+  const navigate = useNavigate();
+  const [firstName, setFirstName] = useState("");
+
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem("authData");
+    const localStorageData = localStorage.getItem("authData");
+
+    if (sessionStorageData || localStorageData) {
+      try {
+        const authData = JSON.parse(sessionStorageData || localStorageData);
+        const user = authData.user;
+        console.log("user", user);
+        setFirstName(user);
+      } catch (e) {
+        console.log(
+          "Error parsing username from session storage or local storage",
+          e
+        );
+      }
+    }
+  }, []);
 
   return (
     <Box p={3}>
@@ -75,7 +95,7 @@ const HomePage = () => {
       >
         <Box>
           <Typography variant="h4" fontWeight={600} mb={1.5}>
-            Welcome Back, User 👋
+            Welcome Back, {firstName.toUpperCase()} 👋
           </Typography>
         </Box>
       </Box>
@@ -99,8 +119,9 @@ const HomePage = () => {
           New Chat
         </Button>
         <Button
-           variant="contained"
+          variant="contained"
           startIcon={<Icon icon="basil:user-plus-solid" />}
+          onClick={() => navigate("/dashboard/connections")}
         >
           Add New Connections
         </Button>
@@ -111,7 +132,7 @@ const HomePage = () => {
         {analyticsData.map((item, index) => (
           <Grid item xs={12} md={4} key={index}>
             <Paper elevation={2} sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={2}>
+              {/* <Box display="flex" alignItems="center" gap={2}>
                 <Icon icon={item.icon} width="36" color={item.color} />
                 <Box>
                   <Typography variant="body2" color="text.secondary">
@@ -121,6 +142,31 @@ const HomePage = () => {
                     {item.value}
                   </Typography>
                 </Box>
+              </Box> */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "1rem",
+                    alignItems: "center",
+                  }}
+                >
+                  <Icon icon={item.icon} width="30" color={item.color} />
+                  <Typography variant="body1" color="text.secondary">
+                    {item.title}
+                  </Typography>
+                </Box>
+                <Typography variant="h5" fontWeight={600}>
+                  {item.value}
+                </Typography>
               </Box>
             </Paper>
           </Grid>
@@ -142,7 +188,8 @@ const HomePage = () => {
               <Icon
                 icon="material-symbols:calendar-month"
                 width="24"
-                color="#6366F1"
+                // color="#6366F1"
+                color="#fdba74"
               />
             </Box>
 
@@ -155,37 +202,18 @@ const HomePage = () => {
               </Box>
             ))}
 
-            <Button variant="contained" fullWidth>
-              View All
-            </Button>
-          </Paper>
-        </Grid>
-
-        {/* Recent Chats */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
+            <Button
+              variant="outlined"
+              fullWidth
+              size="small"
+              sx={{
+                "&:hover": {
+                  backgroundColor: "#6366F1",
+                  color: "white",
+                },
+                marginTop: "2.5rem",
+              }}
             >
-              <Typography variant="h6">Recent Chats</Typography>
-              <Icon icon="material-symbols:chat" width="24" color="#6366F1" />
-            </Box>
-
-            <List>
-              {recentChats.map((chat, index) => (
-                <ListItem key={index}>
-                  <ListItemAvatar>
-                    <Avatar>{chat.avatar}</Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={chat.name} secondary={chat.message} />
-                </ListItem>
-              ))}
-            </List>
-
-            <Button variant="outlined" fullWidth>
               View All
             </Button>
           </Paper>
@@ -204,22 +232,76 @@ const HomePage = () => {
               <Icon
                 icon="material-symbols:bolt-outline"
                 width="24"
-                color="#6366F1"
+                // color="#6366F1"
+                color="#fdba74"
               />
             </Box>
 
-            <Stack spacing={2}>
+            <Stack spacing={2} sx={{ marginTop: "3rem" }}>
               {scheduleShortcuts.map((shortcut, index) => (
                 <Button
                   key={index}
                   variant="outlined"
                   startIcon={<Icon icon={shortcut.icon} />}
                   fullWidth
+                  size="small"
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "#6366F1",
+                      color: "white",
+                    },
+                  }}
                 >
                   {shortcut.label}
                 </Button>
               ))}
             </Stack>
+          </Paper>
+        </Grid>
+
+        {/* Recent Chats */}
+        <Grid item xs={12} md={4}>
+          <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              // mb={2}
+            >
+              <Typography variant="h6">Recent Chats</Typography>
+              <Icon
+                icon="material-symbols:chat"
+                width="24"
+                // color="#6366F1"
+                color="#fdba74"
+              />
+            </Box>
+
+            <List>
+              {recentChats.map((chat, index) => (
+                <ListItem key={index}>
+                  <ListItemAvatar>
+                    <Avatar>{chat.avatar}</Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={chat.name} secondary={chat.message} />
+                </ListItem>
+              ))}
+            </List>
+
+            <Button
+              variant="outlined"
+              fullWidth
+              size="small"
+              sx={{
+                "&:hover": {
+                  backgroundColor: "#6366F1",
+                  color: "white",
+                },
+                marginTop: "1rem",
+              }}
+            >
+              View All
+            </Button>
           </Paper>
         </Grid>
       </Grid>

@@ -10,6 +10,7 @@ import {
 import { motion } from "framer-motion";
 import { VideoCall, Chat, Schedule, Lock } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import applogo from "../assets/video-call.svg";
 
 const features = [
   {
@@ -55,9 +56,23 @@ const LandingPage = () => {
           flexShrink: 0,
         }}
       >
-        <Typography variant="subtitle1" fontWeight={600}>
-          WebRTC | Video App
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <img
+            src={applogo}
+            alt="Company Logo"
+            style={{ width: "50px", height: "50px" }}
+          />{" "}
+          <Typography variant="subtitle1" fontWeight={600}>
+            WebRTC
+          </Typography>
+        </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="subtitle2">Ready to sync your world?</Typography>
           <Button

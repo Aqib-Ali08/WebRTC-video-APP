@@ -3,6 +3,7 @@ import { Box, Tabs, Tab, Tooltip, Avatar } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { path: "/dashboard/home", label: "Home", icon: "material-symbols:home" },
@@ -41,10 +42,34 @@ const navItems = [
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const sessionStorageData = sessionStorage.getItem("authData");
+    const localStorageData = localStorage.getItem("authData");
+
+    if (sessionStorageData || localStorageData) {
+      try {
+        const authData = JSON.parse(sessionStorageData || localStorageData);
+        const user = authData.user;
+        console.log("user", user);
+        setUserName(user);
+      } catch (e) {
+        console.error("Error parsing authData from sessionStorage", err);
+      }
+    }
+  }, []);
 
   const currentTab = navItems.findIndex((item) =>
     location.pathname.startsWith(item.path)
   );
+
+  const firstName =
+    userName
+      .split()
+      .map((firstname) => firstname[0])
+      .join("")
+      .toUpperCase() || "User";
 
   return (
     <motion.aside
@@ -72,7 +97,7 @@ const Sidebar = () => {
       >
         S
       </Box> */}
-      <Tooltip title="John Doe">
+      <Tooltip title={userName.toUpperCase()}>
         <Avatar
           sx={{
             fontFamily: "Poppins",
@@ -80,7 +105,7 @@ const Sidebar = () => {
             cursor: "pointer",
           }}
         >
-          JD
+          {firstName}
         </Avatar>
       </Tooltip>
 

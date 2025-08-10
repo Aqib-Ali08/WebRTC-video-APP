@@ -15,7 +15,7 @@ const MainApp = () => {
     socket.on("notify", (data) => {
       console.log(data);
       const message = data.message || "🔔 You have a new notification!";
-      const type = data.type === "FRIEND_REQUEST" ? "info" : "success";
+      const type = data.type || "info";
 
       dispatch(showToast(message, type));
     });
@@ -30,4 +30,3 @@ const MainApp = () => {
 };
 
 export default MainApp;
-

@@ -1,52 +1,58 @@
-import { useEffect, useMemo, useState } from "react";
-import { Box, CircularProgress, TablePagination } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  CircularProgress,
+  TablePagination,
+  Typography,
+} from "@mui/material";
 import ConnectionCard from "../components/ConnectionCard";
-import { handleGetUsers, handleActionAdd, getCurrentUserId } from "../services";
+import {
+  handleActionAdd,
+  getCurrentUserId,
+  handleListOtherUsers,
+} from "../services";
 import { useSocket } from "../context/socketContext";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
+import { showToast } from "../redux/slices/appSlice";
 
 const AddNewConnection = () => {
-  // const socket = useMemo(() => {
-  //   getSocket();
-  // }, []);
   const socket = useSocket();
-  const [usersData, setUsersData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const dispatch = useDispatch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loadingAction, setLoadingAction] = useState({
+    id: null,
+    type: null,
+  });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["allUsers", page, rowsPerPage],
+    queryFn: () => handleListOtherUsers(page + 1, rowsPerPage),
+  });
 
-  const fetchUsers = async () => {
+  console.log("data", data?.data);
+
+  const handleAddFriend = async (userId, fullName, actionType) => {
     try {
-      setLoading(true);
-      const res = await handleGetUsers();
-      if (res) {
-        setUsersData(res.data.addNewConnection);
-      }
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddFriend = async (userId) => {
-    try {
-      const response = await handleActionAdd(userId);
-      if (response) {
-        // Emit socket event
-        if (typeof socket !== "undefined") {
+      setLoadingAction({ id: userId, type: actionType });
+      if (actionType === "add" && socket) {
+        const res = await handleActionAdd(userId);
+        if (res) {
           socket.emit("friend:requestSent", {
             toUserId: userId,
             fromUserId: getCurrentUserId(),
-            message: "You have a new friend request!",
           });
         }
+        dispatch(showToast(`You have sent request to ${fullName}!`, "success"));
       }
+      queryClient.invalidateQueries(["allUsers"]);
     } catch (error) {
-      console.error("Add friend failed:", error);
+      console.error(`Failed to ${actionType} request:`, error);
+    } finally {
+      setLoadingAction({ id: null, type: null });
     }
   };
 
@@ -59,18 +65,23 @@ const AddNewConnection = () => {
     setPage(0);
   };
 
-  if (loading) {
+  if (isPending) {
     return (
-      <Box display="flex" justifyContent="center" mt={3}>
+      <Box sx={{ textAlign: "center" }}>
         <CircularProgress />
       </Box>
     );
   }
 
-  const paginatedUsers = usersData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  if (isError) {
+    return (
+      <Box sx={{ textAlign: "center" }}>
+        <Typography sx={{ fontWeight: "bold" }}>
+          {"Oops! No Data(s) Found!" || error.message}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -81,21 +92,25 @@ const AddNewConnection = () => {
         alignItems: "center",
       }}
     >
-      {paginatedUsers.map((user) => (
+      {data?.data?.map((user) => (
         <ConnectionCard
           key={user._id}
           id={user._id}
           name={user.full_name}
           image={user.profilePic}
+          loadingAdd={
+            loadingAction.id === user._id && loadingAction.type === "add"
+          }
           type="add"
-          onAction={(id, actionType) => {
-            if (actionType === "add") handleAddFriend(id);
-          }}
+          onAction={(id, actionType) =>
+            handleAddFriend(id, user.full_name, actionType)
+          }
+          sentRequest={user.sentRequest}
         />
       ))}
       <TablePagination
         component="div"
-        count={usersData.length}
+        count={data?.totalUsers || 0}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}

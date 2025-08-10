@@ -1,11 +1,8 @@
 import axios from "axios";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 
 // const domain = "https://webrtc-backend-1ipj.onrender.com/api/v1";
 const domain = "https://webrtc-backend-xmll.onrender.com/api/v1";
-
-
-
 
 export function getTokenFromLocalStorage() {
   const authData =
@@ -21,19 +18,21 @@ export function getTokenFromLocalStorage() {
     return null;
   }
 }
+
 export const getCurrentUserId = () => {
   try {
-    const token = getTokenFromLocalStorage()
+    const token = getTokenFromLocalStorage();
     if (!token) return null;
 
     const decoded = jwtDecode(token);
-    console.log(decoded)
+    console.log(decoded);
     return decoded.id || decoded.userId || null;
   } catch (error) {
     console.error("Invalid token:", error);
     return null;
   }
 };
+
 export const handleLogin = async (username, password) => {
   try {
     const response = await axios.post(`${domain}/auth/login`, {
@@ -76,17 +75,73 @@ export const handleRefreshToken = async (refreshToken) => {
   }
 };
 
-export const handleGetUsers = async (refreshToken) => {
+export const handleListOtherUsers = async (page, rowsPerPage) => {
   try {
     const token = getTokenFromLocalStorage();
 
-    const response = await axios.get(`${domain}/users/getAllUsers`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await axios.post(
+      `${domain}/users/list_other_users`,
+      {
+        page: page,
+        limit: rowsPerPage,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    console.log("Users:", response.data);
+    console.log("List Other Users:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Get users failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleListReceivedRequests = async (page, rowsPerPage) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.post(
+      `${domain}/users/list_recieved_requests`,
+      {
+        page: page,
+        limit: rowsPerPage,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("List Received Requests:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Get users failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleListConnectedUsers = async (page, rowsPerPage) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.post(
+      `${domain}/users/list_connected_users`,
+      {
+        page: page,
+        limit: rowsPerPage,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("List Connected Users:", response.data);
     return response.data;
   } catch (error) {
     console.error("Get users failed:", error.response?.data || error.message);
@@ -113,10 +168,14 @@ export const handleActionAdd = async (receiverId) => {
     // console.log("Users:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Get users failed:", error.response?.data || error.message);
+    console.error(
+      "Add request users failed:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
+
 export const handleActionAccept = async (senderId) => {
   try {
     const token = getTokenFromLocalStorage();
@@ -136,10 +195,14 @@ export const handleActionAccept = async (senderId) => {
     // console.log("Users:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Get users failed:", error.response?.data || error.message);
+    console.error(
+      "Accept request users failed:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
+
 export const handleActionCancel = async (senderId) => {
   try {
     const token = getTokenFromLocalStorage();
@@ -159,18 +222,23 @@ export const handleActionCancel = async (senderId) => {
     // console.log("Users:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Get users failed:", error.response?.data || error.message);
+    console.error(
+      "Cancel request users failed:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
-export const handleActionBlock = async (userId) => {
+
+export const handleActionBlock = async (userId, actionType) => {
   try {
     const token = getTokenFromLocalStorage();
 
     const response = await axios.post(
-      `${domain}/users/block`,
+      `${domain}/connect/toggleUserBlock`,
       {
         userId,
+        action_type: actionType,
       },
       {
         headers: {
@@ -182,7 +250,34 @@ export const handleActionBlock = async (userId) => {
     // console.log("Users:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Get users failed:", error.response?.data || error.message);
+    console.error(
+      "Block/Unblock users failed:",
+      error.response?.data || error.message
+    );
     throw error;
+  }
+};
+
+export const handleActionDisconnectFriend = async (userId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.post(
+      `${domain}/connect/disconnectFriend`,
+      {
+        targetUserId: userId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Disconnect user request failed:",
+      error.response?.data || error.message
+    );
   }
 };

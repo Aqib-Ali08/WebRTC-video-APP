@@ -6,7 +6,7 @@ import { getTokenFromLocalStorage } from "../services";
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
+  // const [socket, setSocket] = useState(null);
 
   const token = getTokenFromLocalStorage();
 
@@ -27,7 +27,7 @@ export const SocketProvider = ({ children }) => {
       console.error("Socket connection error:", err.message);
     });
 
-    setSocket(newSocket);
+    // setSocket(newSocket);
 
     return newSocket;
   }, [token]);
