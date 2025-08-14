@@ -6,25 +6,23 @@ import {
   Typography,
 } from "@mui/material";
 import ConnectionCard from "../components/ConnectionCard";
-import {
-  handleActionBlock,
-  handleActionDisconnectFriend,
-  handleListConnectedUsers,
-} from "../services";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
-import { showToast } from "../redux/slices/appSlice";
+import { handleListConnectedUsers } from "../services";
+import { useQuery } from "@tanstack/react-query";
+import useFriendActions from "../hooks/useFriendActions";
 
 const ConnectionManagement = () => {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [loadingAction, setLoadingAction] = useState({
-    id: null,
-    type: null,
-  });
+  // const [loadingAction, setLoadingAction] = useState({
+  //   id: null,
+  //   type: null,
+  // });
+
+  const { loadingAction, removeFriend, blockFriend, unblockFriend } =
+    useFriendActions();
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["connection", page, rowsPerPage],
@@ -32,31 +30,6 @@ const ConnectionManagement = () => {
   });
 
   console.log("Connection Management", data?.data);
-
-  const handleManageAction = async (userId, fullName, actionType) => {
-    setLoadingAction({ id: userId, type: actionType });
-    try {
-      if (actionType === "remove") {
-        await handleActionDisconnectFriend(userId);
-        dispatch(showToast(`${fullName} is removed successfully!`, "success"));
-      } else if (actionType === "BLOCK" || actionType === "UNBLOCK") {
-        await handleActionBlock(userId, actionType);
-        dispatch(
-          showToast(
-            actionType === "BLOCK"
-              ? `${fullName} is blocked successfully!`
-              : `${fullName} is unblocked successfully!`
-          ),
-          "success"
-        );
-      }
-      queryClient.invalidateQueries(["connection"]);
-    } catch (error) {
-      console.error(`Failed to perform ${actionType}:`, error);
-    } finally {
-      setLoadingAction({ id: null, actionType: null });
-    }
-  };
 
   const handleChangePage = (_, newPage) => {
     setPage(newPage);
@@ -124,9 +97,18 @@ const ConnectionManagement = () => {
             loadingAction.id === user._id && loadingAction.type === "remove"
           }
           type="manage"
-          onAction={(id, actionType) =>
-            handleManageAction(id, user.full_name, actionType)
-          }
+          // onAction={(id, actionType) =>
+          //   handleManageAction(id, user.full_name, actionType)
+          // }
+          onAction={(id, actionType) => {
+            if (actionType === "remove") {
+              removeFriend(id, user.full_name);
+            } else if (actionType === "BLOCK") {
+              blockFriend(id, user.full_name);
+            } else if (actionType === "UNBLOCK") {
+              unblockFriend(id, user.full_name);
+            }
+          }}
           isBlocked={user.isBlocked}
         />
       ))}

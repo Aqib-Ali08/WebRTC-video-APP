@@ -5,6 +5,7 @@ import {
   Typography,
   Checkbox,
   FormControlLabel,
+  CircularProgress,
 } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -23,10 +24,12 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 
 const LoginPage = () => {
-  const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const initialValues = {
     username: "",
     password: "",
@@ -41,6 +44,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
+      setLoading(true);
       const data = await handleLogin(values.username, values.password);
       dispatch(
         loginSuccess({
@@ -57,6 +61,7 @@ const LoginPage = () => {
       setErrors({ password: "Invalid credentials" });
     } finally {
       setSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -189,11 +194,14 @@ const LoginPage = () => {
                       fullWidth
                       type="submit"
                       variant="contained"
+                      disabled={loading || isSubmitting}
                       sx={{ mt: 2 }}
-                      disabled={isSubmitting}
-                      onKeyDown={handleKeyPress}
                     >
-                      Login
+                      {loading ? (
+                        <CircularProgress size={20} color="inherit" />
+                      ) : (
+                        "Login"
+                      )}
                     </Button>
                   </motion.div>
 

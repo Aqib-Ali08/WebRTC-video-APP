@@ -21,6 +21,15 @@ const ConnectionCard = ({
         return (
           <>
             <Button
+              variant="outlined"
+              size="small"
+              sx={actionBtnStyles("secondary")}
+              onClick={() => onAction(id, "reject")}
+              disabled={loadingDelete}
+            >
+              {loadingDelete ? "Rejecting..." : "Reject"}
+            </Button>
+            <Button
               variant="contained"
               size="small"
               sx={actionBtnStyles("primary")}
@@ -31,15 +40,6 @@ const ConnectionCard = ({
             >
               {loadingAccept ? "Accepting..." : "Accept"}
             </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              sx={actionBtnStyles("secondary")}
-              onClick={() => onAction(id, "reject")}
-              disabled={loadingDelete}
-            >
-              {loadingDelete ? "Rejecting..." : "Reject"}
-            </Button>
           </>
         );
       case "add":
@@ -47,7 +47,7 @@ const ConnectionCard = ({
           <Button
             variant="contained"
             size="small"
-            sx={actionBtnStyles("primary")}
+            sx={actionBtnStyles(sentRequest ? "sent" : "primary")}
             onClick={() => onAction(id, "add")}
             startIcon={sentRequest ? <Check /> : <Add />}
             disabled={sentRequest || loadingAdd}
@@ -65,7 +65,7 @@ const ConnectionCard = ({
             <Button
               variant="outlined"
               size="small"
-              sx={actionBtnStyles("secondary")}
+              sx={actionBtnStyles("outlined")}
               onClick={() => onAction(id, "remove")}
               disabled={loadingDisconnect}
             >
@@ -117,7 +117,12 @@ const ConnectionCard = ({
         <Avatar
           src={image}
           alt={name}
-          sx={{ width: 40, height: 40, bgcolor: "#d1d9ff" }}
+          sx={{
+            width: 40,
+            height: 40,
+            // bgcolor: "#d1d9ff"
+            bgcolor: "#0e7490",
+          }}
         />
         <Typography sx={{ fontSize: "16px" }} fontWeight={600}>
           {name}
@@ -134,31 +139,39 @@ const actionBtnStyles = (variant) => ({
   borderRadius: 1,
   fontWeight: 500,
   px: 2.5,
-  ...(variant === "primary" && {
-    background: "linear-gradient(to right, #6a5af9, #8e73ff)",
-    color: "#fff",
+  ...(variant === "sent" && {
+    color: "green !important",
+  }),
+
+  ...(variant === "outlined" && {
+    // background: "linear-gradient(to right, #6a5af9, #8e73ff)",
+    color: "#0e7490",
     "&:hover": {
-      background: "linear-gradient(to right, #5b4de1, #7d64e6)",
+      // background: "linear-gradient(to right, #5b4de1, #7d64e6)",
     },
     "&.Mui-disabled": {
       background: "#ccc",
       color: "green",
     },
   }),
-  ...(variant === "secondary" && {
-    borderColor: "#c4baff",
-    color: "#6a5af9",
-    "&:hover": {
-      borderColor: "#a79dff",
-      backgroundColor: "#f6f4ff",
-    },
-  }),
-  ...(variant === "error" && {
-    backgroundColor: "#ff5252",
-    "&:hover": {
-      backgroundColor: "#e64949",
-    },
-  }),
+  // ...(variant === "secondary" && {
+  //   borderColor: "#c4baff",
+  //   color: "#6a5af9",
+  //   "&:hover": {
+  //     borderColor: "#a79dff",
+  //     backgroundColor: "#f6f4ff",
+  //   },
+  // }),
+  ...(variant === "error" ||
+    (variant === "secondary" && {
+      backgroundColor: "#ff5252",
+      color: "white",
+      borderColor: "#ff5252",
+      "&:hover": {
+        backgroundColor: "#e64949",
+        borderColor: "#e64949",
+      },
+    })),
 });
 
 export default ConnectionCard;

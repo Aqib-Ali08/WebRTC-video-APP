@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   CircularProgress,
@@ -6,66 +6,34 @@ import {
   Typography,
 } from "@mui/material";
 import ConnectionCard from "../components/ConnectionCard";
-import {
-  getCurrentUserId,
-  handleActionAccept,
-  handleActionCancel,
-  handleListReceivedRequests,
-} from "../services";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSocket } from "../context/socketContext";
+import { handleListReceivedRequests } from "../services";
+import { useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
-import { showToast } from "../redux/slices/appSlice";
+import useFriendActions from "../hooks/useFriendActions";
 
-const NewRequests = () => {
-  const queryClient = useQueryClient();
-  const socket = useSocket();
+const NewRequests = ({ setNewRequestsCount }) => {
+  // const queryClient = useQueryClient();
+  // const socket = useSocket();
 
   const dispatch = useDispatch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [loadingAction, setLoadingAction] = useState({ id: null, type: null });
+  // const [loadingAction, setLoadingAction] = useState({ id: null, type: null });
 
   const { data, isPending, isError } = useQuery({
-    queryKey: ["newRequests", page, rowsPerPage],
+    queryKey: ["newRequestsData", page, rowsPerPage],
     queryFn: () => handleListReceivedRequests(page + 1, rowsPerPage),
   });
 
+  useEffect(() => {
+    if (data?.totalRequests !== undefined) {
+      setNewRequestsCount(data?.totalRequests);
+    }
+  }, [data, setNewRequestsCount]);
+
   console.log("New Requests", data?.data);
 
-  const handleRequestAction = async (userId, fullName, actionType) => {
-    try {
-      setLoadingAction({ id: userId, type: actionType });
-      if (actionType === "accept" && socket) {
-        const res = await handleActionAccept(userId);
-        if (res) {
-          socket.emit("friend:requestAccepted", {
-            toUserId: userId,
-            fromUserId: getCurrentUserId(),
-          });
-        }
-        dispatch(
-          showToast(
-            `You have accepted request from ${fullName}!`,
-            "success"
-          )
-        );
-      } else if (actionType === "reject") {
-        await handleActionCancel(userId);
-        dispatch(
-          showToast(
-            `You have rejected request from ${fullName}!`,
-            "success"
-          )
-        );
-      }
-      queryClient.invalidateQueries(["newRequests"]);
-    } catch (error) {
-      console.error(`Failed to ${actionType} request:`, error);
-    } finally {
-      setLoadingAction({ id: null, type: null });
-    }
-  };
+  const { loadingAction, acceptFriend, rejectFriend } = useFriendActions();
 
   const handleChangePage = (_, newPage) => {
     setPage(newPage);
@@ -124,7 +92,16 @@ const NewRequests = () => {
           }
           image={user.profilePic}
           type="request"
-          onAction={(id, actionType) => handleRequestAction(id, user.full_name, actionType)}
+          // onAction={(id, actionType) =>
+          //   handleRequestAction(id, user.full_name, actionType)
+          // }
+          onAction={(id, actionType) => {
+            if (actionType === "accept") {
+              acceptFriend(id, user.full_name);
+            } else if (actionType === "reject") {
+              rejectFriend(id, user.full_name);
+            }
+          }}
         />
       ))}
       <TablePagination

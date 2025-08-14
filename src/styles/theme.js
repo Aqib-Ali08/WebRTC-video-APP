@@ -4,7 +4,8 @@ const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: '#6366F1',     // Elegant Indigo
+            // main: '#6366F1',     // Elegant Indigo
+            main: '#0e7490',
             contrastText: '#FFFFFF',
         },
         secondary: {
@@ -86,7 +87,8 @@ const theme = createTheme({
         MuiButton: {
             styleOverrides: {
                 root: {
-                    borderRadius: 12,
+                    // borderRadius: 12,
+                    borderRadius: 8,
                     textTransform: 'none',  // No uppercase by default
                     boxShadow: 'none',
                     '&:hover': {

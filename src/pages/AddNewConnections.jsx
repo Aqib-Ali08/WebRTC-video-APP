@@ -6,55 +6,30 @@ import {
   Typography,
 } from "@mui/material";
 import ConnectionCard from "../components/ConnectionCard";
-import {
-  handleActionAdd,
-  getCurrentUserId,
-  handleListOtherUsers,
-} from "../services";
-import { useSocket } from "../context/socketContext";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
-import { showToast } from "../redux/slices/appSlice";
+import { handleListOtherUsers } from "../services";
+import { useQuery } from "@tanstack/react-query";
+import useFriendActions from "../hooks/useFriendActions";
 
 const AddNewConnection = () => {
-  const socket = useSocket();
-  const queryClient = useQueryClient();
+  // const socket = useSocket();
+  // const queryClient = useQueryClient();
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [loadingAction, setLoadingAction] = useState({
-    id: null,
-    type: null,
-  });
+  // const [loadingAction, setLoadingAction] = useState({
+  //   id: null,
+  //   type: null,
+  // });
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["allUsers", page, rowsPerPage],
     queryFn: () => handleListOtherUsers(page + 1, rowsPerPage),
   });
 
-  console.log("data", data?.data);
+  const { loadingAction, addFriend } = useFriendActions();
 
-  const handleAddFriend = async (userId, fullName, actionType) => {
-    try {
-      setLoadingAction({ id: userId, type: actionType });
-      if (actionType === "add" && socket) {
-        const res = await handleActionAdd(userId);
-        if (res) {
-          socket.emit("friend:requestSent", {
-            toUserId: userId,
-            fromUserId: getCurrentUserId(),
-          });
-        }
-        dispatch(showToast(`You have sent request to ${fullName}!`, "success"));
-      }
-      queryClient.invalidateQueries(["allUsers"]);
-    } catch (error) {
-      console.error(`Failed to ${actionType} request:`, error);
-    } finally {
-      setLoadingAction({ id: null, type: null });
-    }
-  };
+  console.log("data", data?.data);
 
   const handleChangePage = (_, newPage) => {
     setPage(newPage);
@@ -102,9 +77,10 @@ const AddNewConnection = () => {
             loadingAction.id === user._id && loadingAction.type === "add"
           }
           type="add"
-          onAction={(id, actionType) =>
-            handleAddFriend(id, user.full_name, actionType)
-          }
+          // onAction={(id, actionType) =>
+          //   handleAddFriend(id, user.full_name, actionType)
+          // }
+          onAction={() => addFriend(user._id, user.full_name)}
           sentRequest={user.sentRequest}
         />
       ))}

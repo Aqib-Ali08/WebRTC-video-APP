@@ -16,31 +16,40 @@ import {
   Stack,
   IconButton,
 } from "@mui/material";
-import { Icon } from "@iconify/react";
-import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useDispatch } from "react-redux";
 import { showToast } from "../redux/slices/appSlice";
 import { useNavigate } from "react-router-dom";
+import {
+  AccessAlarm,
+  AddCircleOutline,
+  CalendarMonth,
+  Chat,
+  ChatBubbleOutline,
+  MarkUnreadChatAlt,
+  Person,
+  PersonAddAlt1,
+  ScheduleSend,
+  Shortcut,
+  Upcoming,
+  VideoCameraFront,
+} from "@mui/icons-material";
 
 const analyticsData = [
   {
     title: "Total Meetings",
     value: "24",
-    icon: "material-symbols:video-call-outline",
-    color: "#c026d3",
+    icon: <VideoCameraFront sx={{ color: "#c026d3", fontSize: 30 }} />,
   },
   {
     title: "Active Chats",
     value: "8",
-    icon: "material-symbols:chat-bubble-outline",
-    color: "#38BDF8",
+    icon: <ChatBubbleOutline sx={{ color: "#38BDF8", fontSize: 30 }} />,
   },
   {
     title: "Users Online",
     value: "5",
-    icon: "material-symbols:person-outline",
-    color: "#10B981",
+    icon: <Person sx={{ color: "#10B981", fontSize: 30 }} />,
   },
 ];
 
@@ -55,9 +64,9 @@ const recentChats = [
 ];
 
 const scheduleShortcuts = [
-  { label: "Create Event", icon: "material-symbols:event-note-outline" },
-  { label: "Set Reminder", icon: "material-symbols:alarm-add-outline" },
-  { label: "Book Slot", icon: "material-symbols:schedule-send-outline" },
+  { label: "Create Event", icon: <CalendarMonth /> },
+  { label: "Set Reminder", icon: <AccessAlarm /> },
+  { label: "Book Slot", icon: <ScheduleSend /> },
 ];
 
 const HomePage = () => {
@@ -94,8 +103,17 @@ const HomePage = () => {
         }}
       >
         <Box>
-          <Typography variant="h4" fontWeight={600} mb={1.5}>
-            Welcome Back, {firstName.toUpperCase()} 👋
+          <Typography variant="h4" fontWeight={600} mb={1.5} sx={{}}>
+            <span
+              style={{
+                background: "linear-gradient(90deg, #115e59, #06b6d4)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Welcome Back,
+            </span>{" "}
+            {firstName.toUpperCase()} 👋
           </Typography>
         </Box>
       </Box>
@@ -106,21 +124,21 @@ const HomePage = () => {
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <Button
           variant="contained"
-          startIcon={
-            <Icon icon="material-symbols:add-circle-outline-rounded" />
-          }
+          startIcon={<AddCircleOutline />}
+          onClick={() => navigate("/dashboard/meetings")}
         >
           Create Meeting
         </Button>
         <Button
           variant="contained"
-          startIcon={<Icon icon="material-symbols:chat-add-on-outline" />}
+          startIcon={<MarkUnreadChatAlt />}
+          onClick={() => navigate("/dashboard/messages")}
         >
           New Chat
         </Button>
         <Button
           variant="contained"
-          startIcon={<Icon icon="basil:user-plus-solid" />}
+          startIcon={<PersonAddAlt1 />}
           onClick={() => navigate("/dashboard/connections")}
         >
           Add New Connections
@@ -159,7 +177,7 @@ const HomePage = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Icon icon={item.icon} width="30" color={item.color} />
+                  {item.icon}
                   <Typography variant="body1" color="text.secondary">
                     {item.title}
                   </Typography>
@@ -185,12 +203,7 @@ const HomePage = () => {
               mb={2}
             >
               <Typography variant="h6">Upcoming Meetings</Typography>
-              <Icon
-                icon="material-symbols:calendar-month"
-                width="24"
-                // color="#6366F1"
-                color="#fdba74"
-              />
+              <Upcoming sx={{ color: "#fdba74" }} />
             </Box>
 
             {upcomingMeetings.map((meeting, index) => (
@@ -208,7 +221,8 @@ const HomePage = () => {
               size="small"
               sx={{
                 "&:hover": {
-                  backgroundColor: "#6366F1",
+                  // backgroundColor: "#6366F1",
+                  backgroundColor: "#0e7490",
                   color: "white",
                 },
                 marginTop: "2.5rem",
@@ -229,12 +243,7 @@ const HomePage = () => {
               mb={2}
             >
               <Typography variant="h6">Schedule Shortcuts</Typography>
-              <Icon
-                icon="material-symbols:bolt-outline"
-                width="24"
-                // color="#6366F1"
-                color="#fdba74"
-              />
+              <Shortcut sx={{ color: "#fdba74" }} />
             </Box>
 
             <Stack spacing={2} sx={{ marginTop: "3rem" }}>
@@ -242,13 +251,14 @@ const HomePage = () => {
                 <Button
                   key={index}
                   variant="outlined"
-                  startIcon={<Icon icon={shortcut.icon} />}
+                  startIcon={shortcut.icon}
                   fullWidth
                   size="small"
                   sx={{
                     "&:hover": {
-                      backgroundColor: "#6366F1",
+                      backgroundColor: "#0e7490",
                       color: "white",
+                      "& .MuiSvgIcon-root": { color: "white" }, // make icon white on hover
                     },
                   }}
                 >
@@ -269,19 +279,16 @@ const HomePage = () => {
               // mb={2}
             >
               <Typography variant="h6">Recent Chats</Typography>
-              <Icon
-                icon="material-symbols:chat"
-                width="24"
-                // color="#6366F1"
-                color="#fdba74"
-              />
+              <Chat sx={{ color: "#fdba74" }} />
             </Box>
 
             <List>
               {recentChats.map((chat, index) => (
                 <ListItem key={index}>
                   <ListItemAvatar>
-                    <Avatar>{chat.avatar}</Avatar>
+                    <Avatar sx={{ backgroundColor: "#0e7490" }}>
+                      {chat.avatar}
+                    </Avatar>
                   </ListItemAvatar>
                   <ListItemText primary={chat.name} secondary={chat.message} />
                 </ListItem>
@@ -294,7 +301,8 @@ const HomePage = () => {
               size="small"
               sx={{
                 "&:hover": {
-                  backgroundColor: "#6366F1",
+                  // backgroundColor: "#6366F1",
+                  backgroundColor: "#0e7490",
                   color: "white",
                 },
                 marginTop: "1rem",

@@ -17,7 +17,6 @@ import DashboardLayout from "./layout/DashboardLayout";
 import HomePage from "./pages/HomePage";
 import MeetingListPage from "./pages/MeetingListPage";
 import MeetingRoomPage from "./pages/MeetingRoomPage";
-import ScheduleMeetingPage from "./pages/ScheduleMeetingPage";
 import ChatListPage from "./pages/ChatListPage";
 import ChatRoomPage from "./pages/ChatRoomPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -26,6 +25,7 @@ import { selectAuthData } from "./redux/slices/authSlice";
 import { useSelector } from "react-redux";
 import ProtectedRoute, { getAuthData } from "./layout/ProtectedRoute";
 import Connections from "./pages/Connections";
+import Schedules from "./pages/Schedules";
 
 const AppRoutes = () => {
   const { token, expiresAt } = getAuthData();
@@ -59,7 +59,7 @@ const AppRoutes = () => {
             <Route path="connections" element={<Connections />} />
             <Route path="meetings" element={<MeetingListPage />} />
             <Route path="meeting/:meetingId" element={<MeetingRoomPage />} />
-            <Route path="schedule" element={<ScheduleMeetingPage />} />
+            <Route path="schedule" element={<Schedules />} />
             <Route path="messages" element={<ChatListPage />} />
             <Route path="messages/:chatId" element={<ChatRoomPage />} />
             <Route path="profile" element={<ProfilePage />} />

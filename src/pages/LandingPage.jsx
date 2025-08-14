@@ -115,7 +115,7 @@ const LandingPage = () => {
               sx={{
                 fontWeight: 700,
                 fontSize: "1rem",
-                background: "linear-gradient(90deg, #667eea, #764ba2)",
+                background: "linear-gradient(90deg, #115e59, #06b6d4)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}

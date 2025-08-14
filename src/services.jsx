@@ -75,6 +75,27 @@ export const handleRefreshToken = async (refreshToken) => {
   }
 };
 
+export const handleSearchList = async (searchQuery) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.get(
+      `${domain}/search/searchUser?q=${searchQuery}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("Search List Users:", response.data);
+    return response.data.results;
+  } catch (error) {
+    console.error("Get search users failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const handleListOtherUsers = async (page, rowsPerPage) => {
   try {
     const token = getTokenFromLocalStorage();

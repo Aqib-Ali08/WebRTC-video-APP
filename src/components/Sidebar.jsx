@@ -1,41 +1,66 @@
 // src/components/Sidebar.jsx
-import { Box, Tabs, Tab, Tooltip, Avatar } from "@mui/material";
+import { Tabs, Tab, Tooltip, Avatar } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Icon } from "@iconify/react";
 import { useEffect, useState } from "react";
+import {
+  AddBox,
+  CalendarMonth,
+  ChatBubble,
+  Dashboard,
+  Notifications,
+  Person,
+  PersonAdd,
+  Settings,
+} from "@mui/icons-material";
 
 const navItems = [
-  { path: "/dashboard/home", label: "Home", icon: "material-symbols:home" },
+  {
+    path: "/dashboard/home",
+    label: "Home",
+    // icon: "material-symbols:home"
+    icon: <Dashboard />,
+  },
   {
     path: "/dashboard/connections",
     label: "Connections",
-    icon: "basil:user-plus-solid",
+    // icon: "basil:user-plus-solid",
+    icon: <PersonAdd />,
+  },
+  {
+    path: "/dashboard/notifications",
+    label: "Notifications",
+    icon: <Notifications />,
   },
   {
     path: "/dashboard/meetings",
     label: "Meetings",
-    icon: "material-symbols:calendar-month",
+    // icon: "material-symbols:calendar-month",
+    icon: <CalendarMonth />,
   },
   {
     path: "/dashboard/messages",
     label: "Messages",
-    icon: "material-symbols:chat",
+    // icon: "material-symbols:chat",
+    icon: <ChatBubble />,
   },
   {
     path: "/dashboard/schedule",
     label: "Schedule",
-    icon: "material-symbols:add-circle-outline",
+    // icon: "material-symbols:add-circle-outline",
+    icon: <AddBox />,
   },
   {
     path: "/dashboard/profile",
     label: "Profile",
-    icon: "material-symbols:person",
+    // icon: "material-symbols:person",
+    icon: <Person />,
   },
   {
     path: "/dashboard/settings",
     label: "Settings",
-    icon: "material-symbols:settings",
+    // icon: "material-symbols:settings",
+    icon: <Settings />,
   },
 ];
 
@@ -101,7 +126,8 @@ const Sidebar = () => {
         <Avatar
           sx={{
             fontFamily: "Poppins",
-            backgroundColor: "#667eea",
+            // backgroundColor: "#667eea",
+            backgroundColor: "#0e7490",
             cursor: "pointer",
           }}
         >
@@ -119,7 +145,8 @@ const Sidebar = () => {
             gap: "1rem",
           },
           ".MuiTabs-indicator": {
-            backgroundColor: "#667eea",
+            // backgroundColor: "#667eea",
+            backgroundColor: "#0e7490",
             width: "4px",
           },
         }}
@@ -128,11 +155,17 @@ const Sidebar = () => {
           <Tooltip key={index} title={item.label} placement="right">
             <Tab
               icon={
-                <Icon
-                  icon={item.icon}
-                  width="24"
-                  color={currentTab === index ? "#667eea" : "rgba(0,0,0,0.6)"}
-                />
+                // <Icon
+                //   icon={item.icon}
+                //   width="24"
+                //   color={
+                //     currentTab === index
+                //       ? // "#667eea"
+                //         "#0e7490"
+                //       : "rgba(0,0,0,0.6)"
+                //   }
+                // />
+                item.icon
               }
               sx={{
                 minWidth: "auto",

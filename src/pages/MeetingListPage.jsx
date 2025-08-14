@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -11,8 +10,13 @@ import {
   Divider,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { Icon } from "@iconify/react";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import {
+  Add,
+  EventAvailable,
+  EventBusy,
+  EventRepeat,
+} from "@mui/icons-material";
 
 const MeetingCard = ({ title, time, members, pending, highlight }) => (
   <Card
@@ -54,7 +58,7 @@ const MeetingCard = ({ title, time, members, pending, highlight }) => (
       variant={highlight ? "contained" : "outlined"}
       size="small"
       fullWidth
-      sx={{ mt: 2 }}
+      sx={{ mt: 2, "&:hover": { backgroundColor: "#0e7490", color: "white" } }}
     >
       View Details
     </Button>
@@ -72,22 +76,25 @@ const MeetingListPage = () => {
         <Box display="flex" gap={2} mt={2}>
           {[
             {
-              icon: "mdi:calendar-check",
+              // icon: "mdi:calendar-check",
+              icon: <EventAvailable sx={{ color: "#4caf50" }} />,
               label: "Schedule meeting",
               count: 36,
-              color: "#4caf50",
+              // color: "#4caf50",
             },
             {
-              icon: "mdi:calendar-refresh",
+              // icon: "mdi:calendar-refresh",
+              icon: <EventRepeat sx={{ color: "#ffc107" }} />,
               label: "Rescheduled meeting",
               count: 14,
-              color: "#ffc107",
+              // color: "#ffc107",
             },
             {
-              icon: "mdi:calendar-remove",
+              // icon: "mdi:calendar-remove",
+              icon: <EventBusy sx={{ color: "#f44336" }} />,
               label: "Cancelled meeting",
               count: 20,
-              color: "#f44336",
+              // color: "#f44336",
             },
           ].map((stat, idx) => (
             <Box
@@ -100,15 +107,37 @@ const MeetingListPage = () => {
               gap={2}
               flex={1}
             >
-              <Icon
+              {/* <Icon
                 icon={stat.icon}
                 color={stat.color}
                 width={32}
                 height={32}
-              />
-              <Box>
-                <Typography fontWeight="600">{stat.count}</Typography>
-                <Typography variant="caption">{stat.label}</Typography>
+              /> */}
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: "5rem",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+                  {stat.icon}
+                  <Typography variant="caption" sx={{ whiteSpace: "nowrap" }}>
+                    {stat.label}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography fontWeight="600">{stat.count}</Typography>
+                </Box>
               </Box>
             </Box>
           ))}
@@ -189,7 +218,7 @@ const MeetingListPage = () => {
           ))}
         </Box>
         <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-          + Create Meeting
+          <Add /> Create Meeting
         </Button>
       </Box>
     </Box>
