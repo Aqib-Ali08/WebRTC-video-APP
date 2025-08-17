@@ -91,7 +91,10 @@ export const handleSearchList = async (searchQuery) => {
     console.log("Search List Users:", response.data);
     return response.data.results;
   } catch (error) {
-    console.error("Get search users failed:", error.response?.data || error.message);
+    console.error(
+      "Get search users failed:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
@@ -300,5 +303,48 @@ export const handleActionDisconnectFriend = async (userId) => {
       "Disconnect user request failed:",
       error.response?.data || error.message
     );
+  }
+};
+
+export const handleGetUsersChat = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.get(`${domain}/chats/get_users_for_chats`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Get Users Chat:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Get users chats failed:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const handleGetUserChatHistory = async (chatId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.get(
+      `${domain}/chats/get_users_chat_history?conversation_id=${chatId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("Get Users Chat History", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Get users chat history failed:",
+      error.response?.data || error.message
+    );
+    throw error;
   }
 };

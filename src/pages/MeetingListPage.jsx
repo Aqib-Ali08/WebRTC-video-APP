@@ -67,7 +67,15 @@ const MeetingCard = ({ title, time, members, pending, highlight }) => (
 
 const MeetingListPage = () => {
   return (
-    <Box display="flex" minHeight="100%" bgcolor="#f3f5ff">
+    <Box
+      display="flex"
+      // minHeight="100%"
+      bgcolor="#f3f5ff"
+      sx={{
+        height: "100vh",
+        overflowY: "auto",
+      }}
+    >
       {/* Main Content */}
       <Box flex={1} p={4}>
         <Typography variant="h6" fontWeight="600">
@@ -179,7 +187,7 @@ const MeetingListPage = () => {
               members: [],
             },
           ].map((meeting, idx) => (
-            <Grid item xs={12} sm={6} md={4} key={idx}>
+            <Grid item xs={12} sm={6} md={4} key={idx} sx={{ mb: 2 }}>
               <MeetingCard {...meeting} />
             </Grid>
           ))}

@@ -112,7 +112,15 @@ const RegisterPage = () => {
           }}
         >
           <Box width="100%" maxWidth="400px">
-            <Typography variant="h4" fontWeight={600}>
+            <Typography
+              variant="h4"
+              fontWeight={600}
+              sx={{
+                background: "linear-gradient(90deg, #115e59, #06b6d4)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               Create Account
             </Typography>
             <Typography>Sign up to get started</Typography>

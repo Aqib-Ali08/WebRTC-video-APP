@@ -39,9 +39,12 @@ function TabPanel({ children, value, index }) {
           mt: 2,
           borderRadius: 2,
           backgroundColor: "#fff",
+          flexGrow: 1,
+          overflowY: "auto",
+          maxHeight: "100vh",
         }}
       >
-        <Typography>{children}</Typography>
+        {children}
       </Paper>
     )
   );
@@ -60,7 +63,7 @@ export default function Connections() {
 
   const handleClose = () => {
     setOpen(false);
-    setSearchQuery("")
+    setSearchQuery("");
   };
 
   const {
@@ -133,7 +136,7 @@ export default function Connections() {
               </Badge>
             }
           />
-          <Tab label="Connection Management" />
+          <Tab label="Connection List" />
         </Tabs>
 
         <Tooltip title="Search your Connections">
@@ -165,6 +168,7 @@ export default function Connections() {
           <DialogContent>
             <TextField
               value={searchQuery}
+              autoFocus
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search connection"
               size="small"

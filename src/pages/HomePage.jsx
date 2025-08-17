@@ -15,6 +15,8 @@ import {
   ListItemText,
   Stack,
   IconButton,
+  Tooltip,
+  Badge,
 } from "@mui/material";
 import "react-calendar/dist/Calendar.css";
 import { useDispatch } from "react-redux";
@@ -27,6 +29,7 @@ import {
   Chat,
   ChatBubbleOutline,
   MarkUnreadChatAlt,
+  Notifications,
   Person,
   PersonAddAlt1,
   ScheduleSend,
@@ -93,30 +96,42 @@ const HomePage = () => {
   }, []);
 
   return (
-    <Box p={3}>
-      {/* Header */}
+    <Box
+      p={3}
+      sx={{
+        height: "100vh",
+        overflowY: "auto",
+      }}
+    >
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
+          justifyContent: "space-between", // pushes text left, icon right
         }}
       >
-        <Box>
-          <Typography variant="h4" fontWeight={600} mb={1.5} sx={{}}>
-            <span
-              style={{
-                background: "linear-gradient(90deg, #115e59, #06b6d4)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Welcome Back,
-            </span>{" "}
-            {firstName.toUpperCase()} 👋
-          </Typography>
-        </Box>
+        <Typography variant="h4" fontWeight={600} mb={1.5}>
+          <span
+            style={{
+              background: "linear-gradient(90deg, #115e59, #06b6d4)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Welcome Back,
+          </span>{" "}
+          {firstName.toUpperCase()} 👋
+        </Typography>
+
+        <Tooltip title="Notifications">
+          <IconButton>
+            <Badge badgeContent={4} color="primary">
+              <Notifications />
+            </Badge>
+          </IconButton>
+        </Tooltip>
       </Box>
+
       <Typography variant="body1" color="text.secondary" mb={3}>
         Here's an overview of your activity.
       </Typography>
@@ -150,17 +165,6 @@ const HomePage = () => {
         {analyticsData.map((item, index) => (
           <Grid item xs={12} md={4} key={index}>
             <Paper elevation={2} sx={{ p: 3 }}>
-              {/* <Box display="flex" alignItems="center" gap={2}>
-                <Icon icon={item.icon} width="36" color={item.color} />
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {item.title}
-                  </Typography>
-                  <Typography variant="h5" fontWeight={600}>
-                    {item.value}
-                  </Typography>
-                </Box>
-              </Box> */}
               <Box
                 sx={{
                   display: "flex",

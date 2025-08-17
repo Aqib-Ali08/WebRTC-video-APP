@@ -95,7 +95,16 @@ const LoginPage = () => {
           }}
         >
           <Box width="100%" maxWidth="400px" p={4}>
-            <Typography variant="h4" fontWeight={600} mb={1}>
+            <Typography
+              variant="h4"
+              fontWeight={600}
+              mb={1}
+              sx={{
+                background: "linear-gradient(90deg, #115e59, #06b6d4)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               Welcome back
             </Typography>
             <Typography mb={2}>Please enter your details</Typography>

@@ -17,7 +17,7 @@ import DashboardLayout from "./layout/DashboardLayout";
 import HomePage from "./pages/HomePage";
 import MeetingListPage from "./pages/MeetingListPage";
 import MeetingRoomPage from "./pages/MeetingRoomPage";
-import ChatListPage from "./pages/ChatListPage";
+import ChatSectionPage from "./pages/ChatSectionPage";
 import ChatRoomPage from "./pages/ChatRoomPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
@@ -60,7 +60,7 @@ const AppRoutes = () => {
             <Route path="meetings" element={<MeetingListPage />} />
             <Route path="meeting/:meetingId" element={<MeetingRoomPage />} />
             <Route path="schedule" element={<Schedules />} />
-            <Route path="messages" element={<ChatListPage />} />
+            <Route path="messages" element={<ChatSectionPage />} />
             <Route path="messages/:chatId" element={<ChatRoomPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<SettingsPage />} />

@@ -13,9 +13,12 @@ function TabPanel({ children, value, index }) {
           mt: 2,
           borderRadius: 2,
           backgroundColor: "#fff",
+          flexGrow: 1,
+          overflowY: "auto",
+          maxHeight: "100vh",
         }}
       >
-        <Typography>{children}</Typography>
+        {children}
       </Paper>
     )
   );
