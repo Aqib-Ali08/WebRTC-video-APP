@@ -1,10 +1,14 @@
 import { createContext, useContext, useEffect, useMemo } from "react";
 import { io } from "socket.io-client";
 import { getTokenFromLocalStorage } from "../services";
+import { useDispatch } from "react-redux";
+import { registerPresenceSocketHandlers } from "../sockets/chats.socket";
 
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
+  const dispatch = useDispatch();
+
   const socketMemo = useMemo(() => {
     const socket = io(
       import.meta.env.VITE_SERVER_URL || "http://localhost:3000",
@@ -43,11 +47,12 @@ export const SocketProvider = ({ children }) => {
     socket.on("connect_error", (err) => {
       console.error("❌ Connection error:", err.message);
     });
-
+    const cleanupChatPresence = registerPresenceSocketHandlers(socket, dispatch);
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("connect_error");
+      cleanupChatPresence()
     };
   }, [socketMemo]);
 

@@ -1,4 +1,4 @@
-const SocketEvent = {
+const SocketEvents = {
   CONNECTION: 'connection',
   DISCONNECT: 'disconnect',
 
@@ -41,7 +41,7 @@ const SocketEvent = {
   SERVER_CHAT_CONVERSATION_UPDATED: 'server:chat:update',
   SERVER_CHAT_MEMBER_JOINED: 'server:chat:memberJoined',
   SERVER_CHAT_MEMBER_LEFT: 'server:chat:memberLeft',
-
+  SERVER_PRESENCE_INIT: 'server:chat:presence:init',
   // Messages
   SERVER_CHAT_RECEIVE: 'server:chat:receiveMessage',
   SERVER_CHAT_MESSAGE_STATUS: 'server:chat:messageStatus',
@@ -79,5 +79,6 @@ const SocketEvent = {
   ERROR: 'error',
 };
 
-export default SocketEvent;
+export default SocketEvents;
+
  

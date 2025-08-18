@@ -1,24 +1,20 @@
-import { Box, Typography } from "@mui/material";
-
+import { Box } from "@mui/material";
 import ChatRoomPage from "./ChatRoomPage";
-import ChatSidebarList from "./ChatSidebarList";
-import ChatProfilePanel from "./ChatProfilePanel";
-import { useParams } from "react-router-dom";
+import { useSocket } from "../context/socketContext";
+import { useEffect } from "react";
+import SocketEvent from "../constants/socketEvent";
+import { setUserOffline, setUserOnline, setUsersStatus } from "../redux/slices/chatSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const ChatSectionPage = () => {
-  const { chatId } = useParams();
+  const socket = useSocket()
+  const dispatch = useDispatch()
+
+
 
   return (
     <Box display="flex" height="100%">
-      {/* Sidebar */}
-      {/* <ChatSidebarList /> */}
-
-      {/* Chat Section */}
-
       <ChatRoomPage />
-
-      {/* Profile Panel */}
-      {/* <ChatProfilePanel /> */}
     </Box>
   );
 };

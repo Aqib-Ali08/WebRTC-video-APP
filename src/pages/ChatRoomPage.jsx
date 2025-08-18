@@ -104,7 +104,7 @@ const ChatRoomPage = () => {
                   <ChevronLeft />
                 </IconButton>
               </Tooltip>
-              <Avatar src={profilePic} sx={{ mr: 1, bgcolor: "#0e7490" }} ></Avatar>
+              <Avatar src={profilePic} alt={fullName} sx={{ mr: 1, bgcolor: "#0e7490" }} ></Avatar>
               <Typography variant="h6">{fullName}</Typography>
             </Box>
             <Box>
@@ -138,81 +138,81 @@ const ChatRoomPage = () => {
           >
             {isPending
               ? Array.from(new Array(6)).map((_, index) => {
-                  const alignLeft = index % 2 === 0;
-                  return (
-                    <Box
-                      key={index}
-                      display="flex"
-                      justifyContent={alignLeft ? "flex-start" : "flex-end"}
-                    >
-                      <Skeleton
-                        variant="rounded"
-                        width="30%"
-                        height={40}
-                        sx={{
-                          borderRadius: 3,
-                          bgcolor: alignLeft ? "#e0e0e0" : "#b2ebf2",
-                        }}
-                      />
-                    </Box>
-                  );
-                })
+                const alignLeft = index % 2 === 0;
+                return (
+                  <Box
+                    key={index}
+                    display="flex"
+                    justifyContent={alignLeft ? "flex-start" : "flex-end"}
+                  >
+                    <Skeleton
+                      variant="rounded"
+                      width="30%"
+                      height={40}
+                      sx={{
+                        borderRadius: 3,
+                        bgcolor: alignLeft ? "#e0e0e0" : "#b2ebf2",
+                      }}
+                    />
+                  </Box>
+                );
+              })
               : sortedMessages.map((msg) => {
-                  const isMine = msg.sender._id === loggedInUserId;
-                  return (
-                    <Box
-                      key={msg._id}
-                      display="flex"
-                      justifyContent={isMine ? "flex-start" : "flex-end"}
-                      alignItems="flex-end"
-                      gap={1}
+                const isMine = msg.sender._id === loggedInUserId;
+                return (
+                  <Box
+                    key={msg._id}
+                    display="flex"
+                    justifyContent={isMine ? "flex-start" : "flex-end"}
+                    alignItems="flex-end"
+                    gap={1}
+                  >
+                    <Paper
+                      sx={{
+                        p: 1,
+                        maxWidth: "60%",
+                        height: "50%",
+                        bgcolor: isMine ? "#fff" : "#0e7490",
+                        color: isMine ? "black" : "white",
+                        borderRadius: 3,
+                        boxShadow: 1,
+                      }}
                     >
-                      <Paper
+                      <Box
                         sx={{
-                          p: 1,
-                          maxWidth: "60%",
-                          height: "50%",
-                          bgcolor: isMine ? "#fff" : "#0e7490",
-                          color: isMine ? "black" : "white",
-                          borderRadius: 3,
-                          boxShadow: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-end",
                         }}
                       >
-                        <Box
+                        <Typography
+                          variant="body2"
                           sx={{
                             display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-end",
+                            pb: 1.5,
+                            mb: 1.5,
                           }}
                         >
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              display: "flex",
-                              pb: 1.5,
-                              mb: 1.5,
-                            }}
-                          >
-                            {msg.content}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              display: "block",
-                              textAlign: "right",
-                              color: "gray",
-                            }}
-                          >
-                            {new Date(msg.createdAt).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </Typography>
-                        </Box>
-                      </Paper>
-                    </Box>
-                  );
-                })}
+                          {msg.content}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "block",
+                            textAlign: "right",
+                            color: "gray",
+                          }}
+                        >
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Box>
+                );
+              })}
             <div ref={messagesEndRef} />
           </Box>
 

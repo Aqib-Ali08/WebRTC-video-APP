@@ -1,6 +1,7 @@
 import { Add, Block, Delete, MoreHoriz, MoreVert } from "@mui/icons-material";
 import {
   Avatar,
+  Badge,
   Box,
   Button,
   IconButton,
@@ -18,9 +19,16 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { handleGetUsersChat } from "../services";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 export default function ChatSidebarList() {
   const navigate = useNavigate();
+  const usersStatus = useSelector((state) => state.chat.usersStatus);
+
+  useEffect(() => {
+    console.log("usersStatus", usersStatus)
+  }, [usersStatus])
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["userChat"],
@@ -117,16 +125,25 @@ export default function ChatSidebarList() {
               >
                 <ListItemButton>
                   <ListItemAvatar>
-                    <Avatar
-                      src={
-                        isDirect ? participant?.profilePic : item.groupAvatar
-                      }
-                      sx={{ bgcolor: "#0e7490" }}
+                    <Badge
+                      overlap="circular"
+                      variant="dot"
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                      // color={usersStatus?.[participant?._id]?.online ? "success" : "default"}
+                      color="success"
                     >
-                      {(isDirect
-                        ? participant?.full_name?.[0]
-                        : item.groupName?.[0]) || ""}
-                    </Avatar>
+
+                      <Avatar
+                        src={
+                          isDirect ? participant?.profilePic : item.groupAvatar
+                        }
+                        sx={{ bgcolor: "#0e7490" }}
+                      >
+                        {(isDirect
+                          ? participant?.full_name?.[0]
+                          : item.groupName?.[0]) || ""}
+                      </Avatar>
+                    </Badge>
                   </ListItemAvatar>
                   <ListItemText
                     primary={
