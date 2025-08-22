@@ -1,27 +1,5 @@
 // src/pages/HomePage.jsx
 
-import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Button,
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Stack,
-  IconButton,
-  Tooltip,
-  Badge,
-} from "@mui/material";
-import "react-calendar/dist/Calendar.css";
-import { useDispatch } from "react-redux";
-import { showToast } from "../redux/slices/appSlice";
-import { useNavigate } from "react-router-dom";
 import {
   AccessAlarm,
   AddCircleOutline,
@@ -37,6 +15,25 @@ import {
   Upcoming,
   VideoCameraFront,
 } from "@mui/icons-material";
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import "react-calendar/dist/Calendar.css";
+import { useNavigate } from "react-router-dom";
 
 const analyticsData = [
   {

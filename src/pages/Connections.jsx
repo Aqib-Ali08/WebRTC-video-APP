@@ -41,7 +41,8 @@ function TabPanel({ children, value, index }) {
           backgroundColor: "#fff",
           flexGrow: 1,
           overflowY: "auto",
-          maxHeight: "100vh",
+          // maxHeight: "100vh", // causing problem of cutting the internal section due to fixed height
+          maxHeight: "calc(100vh - 120px)",
         }}
       >
         {children}

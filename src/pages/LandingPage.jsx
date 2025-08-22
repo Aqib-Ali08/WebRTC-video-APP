@@ -129,7 +129,8 @@ const LandingPage = () => {
           <Box sx={{ mt: 2 }}>
             <Button
               component={Link}
-              to="/register"
+              // to="/register"
+              to="/login"
               variant="contained"
               sx={{ mr: 1.5 }}
             >

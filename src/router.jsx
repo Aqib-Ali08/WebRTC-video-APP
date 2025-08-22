@@ -61,7 +61,6 @@ const AppRoutes = () => {
             <Route path="meeting/:meetingId" element={<MeetingRoomPage />} />
             <Route path="schedule" element={<Schedules />} />
             <Route path="messages" element={<ChatSectionPage />} />
-            <Route path="messages/:chatId" element={<ChatRoomPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

@@ -122,6 +122,7 @@ const LoginPage = () => {
                     label="Username"
                     name="username"
                     margin="normal"
+                    disabled={loading}
                   />
                   <ErrorMessage
                     name="username"
@@ -137,6 +138,7 @@ const LoginPage = () => {
                     // type="password"
                     name="password"
                     margin="normal"
+                    disabled={loading}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
@@ -164,6 +166,7 @@ const LoginPage = () => {
                         <Checkbox
                           size="small"
                           checked={rememberMe}
+                          disabled={loading}
                           onChange={(e) => setRememberMe(e.target.checked)}
                           sx={{
                             padding: 0,
@@ -251,11 +254,6 @@ const LoginPage = () => {
             backgroundColor: "#eee",
           }}
         >
-          {/* <img
-            src={loginSVG}
-            alt="Login Illustration"
-            style={{ width: "80%", maxWidth: "500px" }}
-          /> */}
           <Lottie animationData={login} loop={true} />
         </motion.div>
       </Box>
