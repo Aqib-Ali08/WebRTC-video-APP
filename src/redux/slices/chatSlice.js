@@ -19,6 +19,18 @@ const initialState = {
   //     }
   // }
   // }
+  lastMessages: {},
+  // Shape:
+  // {
+  //   "conversationId1": {
+  //     messageId: "msg123",
+  //     content: "hey",
+  //     sender: "userA",
+  //     createdAt: "2025-08-17T12:34:00Z",
+  //     status: "sent", // "sent" | "delivered" | "read"
+  //     readBy: ["userB"] // array of userIds
+  //   }
+  // }
 };
 
 const chatSlice = createSlice({
@@ -70,6 +82,37 @@ const chatSlice = createSlice({
         },
       };
     },
+    setLastMessage: (state, action) => {
+      const { conversationId, message } = action.payload;
+      state.lastMessages = {
+        ...state.lastMessages,
+        [conversationId]: {
+          messageId: message.message_id,
+          content: message.content,
+          sender: message.sender._id,
+          createdAt: message.createdAt,
+          status: message.status || "sent", // default
+          readBy: message.readBy || [],
+        },
+      };
+    },
+
+    updateLastMessageStatus: (state, action) => {
+      const { conversationId, messageId, status, userId } = action.payload;
+      const lastMsg = state.lastMessages[conversationId];
+      if (!lastMsg) return;
+
+      if (lastMsg.messageId === messageId) {
+        state.lastMessages[conversationId] = {
+          ...lastMsg,
+          status,
+          readBy: lastMsg.readBy.includes(userId)
+            ? lastMsg.readBy
+            : [...lastMsg.readBy, userId],
+        };
+      }
+    },
+
   },
 });
 
@@ -79,6 +122,8 @@ export const {
   setUserOffline,
   resetUsersStatus,
   setTypingStatus,
+  setLastMessage,
+  updateLastMessageStatus,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -1,4 +1,4 @@
-import { Add, MoreVert } from "@mui/icons-material";
+import { Add, Done, DoneAll, MoreVert } from "@mui/icons-material";
 import {
   Avatar,
   Badge,
@@ -24,7 +24,7 @@ import { useSocket } from "../context/socketContext";
 import { getCurrentUserId, handleGetUsersChat } from "../services";
 import ChatRoomPage from "./ChatRoomPage";
 import SocketEvents from "../constants/socketEvent";
-import { setTypingStatus } from "../redux/slices/chatSlice";
+import { setLastMessage, setTypingStatus } from "../redux/slices/chatSlice";
 
 const ChatSectionPage = () => {
   const socket = useSocket();
@@ -32,7 +32,9 @@ const ChatSectionPage = () => {
   const navigate = useNavigate();
   const usersStatus = useSelector((state) => state.chat.usersStatus);
   const typingStatus = useSelector((state) => state.chat.typingStatus);
+  const lastMessages = useSelector((state) => state.chat.lastMessages);
   const selectedC_IdRef = useRef();
+  const myUserId = getCurrentUserId();
   const [roomPageProps, setRoomPageProps] = useState({});
 
   useEffect(() => {
@@ -46,40 +48,51 @@ const ChatSectionPage = () => {
   });
 
   console.log("Data", data);
-
-  const handleChatClick = (conversation_id) => {
-    if (!socket) return;
-
-    if (
-      selectedC_IdRef.current &&
-      selectedC_IdRef.current !== conversation_id
-    ) {
-      // console.log("Leaving Room", selectedC_IdRef.current);
-      socket.emit(SocketEvents.CLIENT_CHAT_LEAVE, {
-        conversationId: selectedC_IdRef.current,
-      });
-    }
-
-    // console.log("Joining Room", conversation_id);
-    selectedC_IdRef.current = conversation_id;
-
-    socket.emit(SocketEvents.CLIENT_CHAT_JOIN, {
-      conversationId: conversation_id,
-    });
-    // console.log("Joined Room", selectedC_IdRef.current);
-  };
-
-  const clientChatLeave = () => {
-    return socket.emit(SocketEvents.CLIENT_CHAT_LEAVE, {
-      conversationId: selectedC_IdRef.current,
-    });
-  };
-
+  const handleServerMessageReceive = (data) => {
+    const newMessage = data.recieved_message
+    // If user is currently viewing this chat → mark as read
+    console.log("New message received:", newMessage);
+    dispatch(setLastMessage({
+      conversationId: newMessage.conversation, message: newMessage
+    }))
+  }
   useEffect(() => {
+    if (!socket || !data?.length) return;
+
+    // Map conversation objects to array of IDs
+    const conversationIds = data.map(c => c.conversationId);
+
+    // Fire join all event
+    socket.emit(SocketEvents.CLIENT_CHAT_JOIN_ALL, { conversationIds });
+    socket.on(SocketEvents.SERVER_CHAT_RECEIVE, (data) => {
+      handleServerMessageReceive(data);
+    });
     return () => {
-      clientChatLeave();
-    };
-  }, []);
+      // Fire leave all event on cleanup
+      socket.emit(SocketEvents.CLIENT_CHAT_LEAVE_ALL, { conversationIds });
+      socket.off(SocketEvents.SERVER_CHAT_RECEIVE);
+
+    }
+  }, [socket, data]);
+
+
+  const handleChatClick = (conversationId) => {
+    if (!socket) return;
+    // console.log("Joining Room", conversationId);
+    selectedC_IdRef.current = conversationId;
+  };
+
+  // const clientChatLeave = () => {
+  //   return socket.emit(SocketEvents.CLIENT_CHAT_LEAVE, {
+  //     conversationId: selectedC_IdRef.current,
+  //   });
+  // };
+
+  // useEffect(() => {
+  //   return () => {
+  //     clientChatLeave();
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -191,18 +204,20 @@ const ChatSectionPage = () => {
                 }
               }
 
-              const convTyping = typingStatus?.[item.conversation_id] || {};
+              const convTyping = typingStatus?.[item.conversationId] || {};
               const isSomeoneTyping =
                 convTyping &&
                 Object.values(convTyping).some((u) => u.typing === true);
-
+              const lastMessage = lastMessages[item.conversationId] || item?.lastMessage;
+              const isMine = lastMessage?.sender === myUserId
+              console.log("lastMessage", lastMessage.content)
               return (
                 <ListItem
                   key={i}
                   disablePadding
                   sx={{ "&:hover .hoverIcon": { opacity: 1 } }}
                   onClick={() => {
-                    handleChatClick(item.conversation_id);
+                    handleChatClick(item.conversationId);
                     setRoomPageProps({
                       fullName: participant?.full_name,
                       profilePic: participant?.profilePic,
@@ -224,7 +239,7 @@ const ChatSectionPage = () => {
                             ? "success"
                             : "default"
                         }
-                        // color="success"
+                      // color="success"
                       >
                         <Avatar
                           src={
@@ -251,30 +266,70 @@ const ChatSectionPage = () => {
                           sx={{
                             display: "flex",
                             flexDirection: "row",
-                            gap: 2,
                             alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 1,
+                            width: "100%",
                           }}
                         >
-                          <Typography
-                            variant="caption"
+                          {/* Left section: tick + message/typing */}
+                          <Box
                             sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              maxWidth: 100,
+                              display: "flex",
+                              alignItems: "center",
+                              minWidth: 0, // important for ellipsis
+                              gap: 0.5,
+                              flex: 1,
                             }}
                           >
-                            {isSomeoneTyping
-                              ? "Typing..."
-                              : item?.lastMessage?.content}
-                          </Typography>
+                            {/* ✅ Show tick only if it's my outgoing message */}
+                            {lastMessage && lastMessage.sender === myUserId && !isSomeoneTyping && (
+                              <Typography
+                                component="span"
+                                variant="caption"
+                                sx={{ color: "text.secondary", flexShrink: 0 }}
+                              >
+                                {lastMessage.readBy?.includes(participant?._id) ? 
+                                <DoneAll
+                                  fontSize="small"
+                                  sx={{ color: "#4fc3f7", fontSize: "1rem" }} // blue double tick if read
+                                /> : <Done
+                                  fontSize="small"
+                                  sx={{ color: isMine ? "rgba(0, 0, 0, 0.7)" : "gray", fontSize: "1rem" }}
+                                />}
+                              </Typography>
+                            )}
+
+                            {/* Message text OR typing indicator */}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                flex: 1,
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                fontStyle: isSomeoneTyping ? "italic" : "normal",
+                                fontWeight:
+                                  isSomeoneTyping
+                                    ? 800 // bold italic for typing
+                                    : lastMessage && lastMessage.sender !== myUserId && !lastMessage.readBy?.includes(participant?._id)
+                                      ? 700 // bold for unread incoming
+                                      : 400, // normal otherwise
+                              }}
+                            >
+                              {isSomeoneTyping ? "Typing..." : lastMessage?.content}
+                            </Typography>
+                          </Box>
+
+                          {/* Right side: time */}
                           <Typography
                             variant="caption"
-                            sx={{ whiteSpace: "nowrap" }}
+                            sx={{ whiteSpace: "nowrap", color: "text.secondary" }}
                           >
                             {formattedPaymentTime}
                           </Typography>
                         </Box>
+
                       }
                     />
                     <IconButton

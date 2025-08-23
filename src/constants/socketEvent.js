@@ -8,8 +8,9 @@ const SocketEvents = {
 
   // Conversation Management
   CLIENT_CHAT_JOIN: 'client:chat:joinRoom',
+  CLIENT_CHAT_JOIN_ALL: 'client:chat:joinRoom:all',
   CLIENT_CHAT_LEAVE: 'client:chat:leaveRoom',
-
+  CLIENT_CHAT_LEAVE_ALL: 'client:chat:leaveRoom:all',
   // Messages
   CLIENT_CHAT_SEND: 'client:chat:sendMessage',
   CLIENT_CHAT_EDIT: 'client:chat:editMessage',
@@ -81,4 +82,3 @@ const SocketEvents = {
 
 export default SocketEvents;
 
- 

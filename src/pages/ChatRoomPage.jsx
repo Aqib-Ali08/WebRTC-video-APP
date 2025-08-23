@@ -1,6 +1,8 @@
 import {
   AddIcCall,
   AttachFile,
+  Done,
+  DoneAll,
   EmojiEmotions,
   MoreVert,
   Send,
@@ -19,11 +21,12 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUserId, handleGetUserChatHistory } from "../services";
 import SocketEvents from "../constants/socketEvent";
 import { useSocket } from "../context/socketContext";
 import { debounce } from "lodash";
+import { setLastMessage, updateLastMessageStatus } from "../redux/slices/chatSlice";
 
 const loggedInUserId = getCurrentUserId();
 
@@ -32,7 +35,7 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
   const chatId = selectedC_IdRef?.current || null;
   const [typeQuery, setTypeQuery] = useState("");
   const [messages, setMessages] = useState([]);
-
+  const dispatch = useDispatch();
   const usersStatus = useSelector((state) => state.chat.usersStatus);
   useEffect(() => {
     console.log("usersStatus", usersStatus);
@@ -79,15 +82,7 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
   const handleSendMessage = () => {
     if (!typeQuery.trim()) return;
 
-    const newMessage = {
-      _id: Date.now().toString(), //temp
-      content: typeQuery,
-      chatId: selectedC_IdRef.current,
-      sender: { _id: loggedInUserId },
-      createdAt: new Date().toISOString(),
-    };
 
-    setMessages((prev) => [...prev, newMessage]);
     setTypeQuery("");
 
     socket?.emit(SocketEvents.CLIENT_CHAT_SEND, {
@@ -96,10 +91,19 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
     });
   };
 
-  const allMessages = [
-    ...sortedMessages,
-    ...messages.filter((m) => m.chatId === selectedC_IdRef.current),
-  ];
+  const allMessages = useMemo(() => {
+    const combined = [
+      ...sortedMessages,
+      ...messages.filter((m) => m.conversation === selectedC_IdRef.current),
+    ];
+    return combined.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }, [sortedMessages, messages, selectedC_IdRef.current]);
+
+  useEffect(() => {
+    if (allMessages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [allMessages]);
 
   const typingTimeoutRef = useRef(null);
 
@@ -135,11 +139,46 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
     }, 2000);
   };
 
+  const handleServerMessageReceive = (data) => {
+    const newMessage = data.recieved_message
+    // If user is currently viewing this chat → mark as read
+    console.log("New message received:", newMessage);
+    dispatch(setLastMessage({
+      conversationId: chatId, message: newMessage
+    }));
+    if (newMessage.conversation === chatId) {
+      setMessages((prev) => [...prev, newMessage]);
+
+      socket.emit(SocketEvents.CLIENT_CHAT_READ, {
+        conversationId: chatId,
+        messageId: newMessage.message_id,
+      });
+    }
+  }
+
+  const handleServerChatMessageStatus = (data) => {
+    // only update if this conversation is open
+    const { conversationId, messageId, status, userId } = data;
+    if (conversationId === chatId) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.message_id === messageId
+            ? { ...msg, status, readBy: [...(msg.readBy || []), userId] }
+            : msg
+        )
+      );
+    }
+    dispatch(updateLastMessageStatus(data));
+  }
+
+
   useEffect(() => {
     socket.on(SocketEvents.SERVER_CHAT_RECEIVE, (data) => {
-      console.log("SERVER CHAT RECEIVE", data);
+      handleServerMessageReceive(data);
     });
-
+    socket.on(SocketEvents.SERVER_CHAT_MESSAGE_STATUS, (data) => {
+      handleServerChatMessageStatus(data);
+    });
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -151,8 +190,31 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
         });
       }
       socket.off(SocketEvents.SERVER_CHAT_RECEIVE);
+      socket.off(SocketEvents.SERVER_CHAT_MESSAGE_STATUS);
+
     };
   }, [socket, chatId, emitTyping]);
+
+  const seenMessagesRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!chatId || allMessages.length === 0) return;
+
+    allMessages.forEach((msg) => {
+      if (
+        msg.sender._id !== loggedInUserId &&
+        !(msg.readBy || []).includes(loggedInUserId) &&
+        !seenMessagesRef.current.has(msg.message_id) // ✅ don’t re-emit
+      ) {
+        socket.emit(SocketEvents.CLIENT_CHAT_READ, {
+          conversationId: chatId,
+          messageId: msg.message_id,
+        });
+        seenMessagesRef.current.add(msg.message_id);
+      }
+    });
+  }, [chatId, allMessages, socket]);
+
 
   const convTyping = typingStatus?.[chatId] || {};
   const isSomeoneTyping =
@@ -214,14 +276,14 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
                     ? "Online"
                     : usersStatus?.[roomPageProps.userId]?.lastSeen
                       ? `Last seen: ${new Date(
-                          usersStatus[roomPageProps.userId].lastSeen
-                        ).toLocaleString([], {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}`
+                        usersStatus[roomPageProps.userId].lastSeen
+                      ).toLocaleString([], {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`
                       : ""}
                 </Typography>
               </Box>
@@ -257,81 +319,103 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
           >
             {isPending
               ? Array.from(new Array(6)).map((_, index) => {
-                  const alignLeft = index % 2 === 0;
-                  return (
-                    <Box
-                      key={index}
-                      display="flex"
-                      justifyContent={alignLeft ? "flex-start" : "flex-end"}
-                    >
-                      <Skeleton
-                        variant="rounded"
-                        width="30%"
-                        height={40}
-                        sx={{
-                          borderRadius: 3,
-                          bgcolor: alignLeft ? "#e0e0e0" : "#b2ebf2",
-                        }}
-                      />
-                    </Box>
-                  );
-                })
+                const alignLeft = index % 2 === 0;
+                return (
+                  <Box
+                    key={index}
+                    display="flex"
+                    justifyContent={alignLeft ? "flex-start" : "flex-end"}
+                  >
+                    <Skeleton
+                      variant="rounded"
+                      width="30%"
+                      height={40}
+                      sx={{
+                        borderRadius: 3,
+                        bgcolor: alignLeft ? "#e0e0e0" : "#b2ebf2",
+                      }}
+                    />
+                  </Box>
+                );
+              })
               : allMessages.map((msg) => {
-                  const isMine = msg.sender._id === loggedInUserId;
-                  return (
-                    <Box
-                      key={msg._id}
-                      display="flex"
-                      justifyContent={isMine ? "flex-end" : "flex-start"}
-                      alignItems="flex-end"
-                      gap={1}
+                const isMine = msg.sender._id === loggedInUserId;
+                return (
+                  <Box
+                    key={msg.message_id}
+                    display="flex"
+                    justifyContent={isMine ? "flex-end" : "flex-start"}
+                    alignItems="flex-end"
+                    gap={1}
+                  >
+                    <Paper
+                      sx={{
+                        px: 1.5,
+                        py: 1,
+                        maxWidth: "65%",
+                        borderRadius: 1,
+                        bgcolor: isMine ? "#0e7490" : "#ffffff",
+                        color: isMine ? "white" : "black",
+                        boxShadow: 1,
+                        position: "relative",
+                      }}
                     >
-                      <Paper
+                      {/* Message text */}
+                      <Typography
+                        variant="body2"
                         sx={{
-                          p: 1,
-                          maxWidth: "60%",
-                          height: "50%",
-                          bgcolor: isMine ? "#0e7490" : "#ffffff",
-                          color: isMine ? "white" : "black",
-                          borderRadius: 3,
-                          boxShadow: 1,
+                          wordBreak: "break-word",
+                          whiteSpace: "pre-wrap",
+                          fontSize: "0.95rem",
+                          lineHeight: 1.4,
+                          pr: 7, // extra space for timestamp + tick
                         }}
                       >
-                        <Box
+                        {msg.content}
+                      </Typography>
+
+                      {/* Timestamp + Tick */}
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          bottom: 6,
+                          right: 8,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.3,
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
                           sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "flex-end",
+                            fontSize: "0.7rem",
+                            color: isMine ? "rgba(255,255,255,0.7)" : "gray",
                           }}
                         >
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              display: "flex",
-                              pb: 1.5,
-                              mb: 1.5,
-                            }}
-                          >
-                            {msg.content}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              display: "block",
-                              textAlign: "right",
-                              color: "gray",
-                            }}
-                          >
-                            {new Date(msg.createdAt).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </Typography>
-                        </Box>
-                      </Paper>
-                    </Box>
-                  );
-                })}
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </Typography>
+
+                        {isMine && (
+                          msg.readBy?.includes(roomPageProps.userId) ? (
+                            <DoneAll
+                              fontSize="small"
+                              sx={{ color: "#4fc3f7", fontSize: "1rem" }} // blue double tick if read
+                            />
+                          ) : (
+                            <Done
+                              fontSize="small"
+                              sx={{ color: isMine ? "rgba(255,255,255,0.7)" : "gray", fontSize: "1rem" }}
+                            />
+                          )
+                        )}
+                      </Box>
+                    </Paper>
+                  </Box>
+                );
+              })}
             <div ref={messagesEndRef} />
           </Box>
 
@@ -363,7 +447,16 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
               value={typeQuery}
               autoFocus
               onChange={handleTyping}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault(); // prevent newline
+                  handleSendMessage(); // send
+                }
+              }}
               fullWidth
+              multiline   // allow new lines
+              minRows={1}
+              maxRows={6}
               placeholder="Write something..."
               variant="outlined"
               InputProps={{
