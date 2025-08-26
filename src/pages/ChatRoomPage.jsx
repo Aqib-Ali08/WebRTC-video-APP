@@ -25,22 +25,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUserId, handleGetUserChatHistory } from "../services";
 import SocketEvents from "../constants/socketEvent";
 import { useSocket } from "../context/socketContext";
-import { debounce } from "lodash";
-import { setLastMessage, updateLastMessageStatus } from "../redux/slices/chatSlice";
+import { debounce, get } from "lodash";
+import { clearUnread, incrementUnread, setLastMessage, updateLastMessageStatus } from "../redux/slices/chatSlice";
 
 const loggedInUserId = getCurrentUserId();
 
-const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
+const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) => {
   const socket = useSocket();
   const chatId = selectedC_IdRef?.current || null;
   const [typeQuery, setTypeQuery] = useState("");
   const [messages, setMessages] = useState([]);
   const dispatch = useDispatch();
   const usersStatus = useSelector((state) => state.chat.usersStatus);
-  useEffect(() => {
-    console.log("usersStatus", usersStatus);
-  }, [usersStatus]);
-
+  const myUserId = getCurrentUserId();
   const typingStatus = useSelector((state) => state.chat.typingStatus);
 
   const { data, isPending } = useQuery({
@@ -53,7 +50,7 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
   // Sort messages by createdAt (oldest first)
   const sortedMessages = useMemo(() => {
     if (!data) return [];
-
+    console.log("Fetched chat history:", data);
     // If data is already an array
     if (Array.isArray(data)) {
       return [...data].sort(
@@ -89,6 +86,8 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
       conversationId: chatId,
       text: typeQuery,
     });
+
+
   };
 
   const allMessages = useMemo(() => {
@@ -96,7 +95,16 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
       ...sortedMessages,
       ...messages.filter((m) => m.conversation === selectedC_IdRef.current),
     ];
-    return combined.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    // Remove duplicates by message_id
+    const uniqueMessagesMap = new Map();
+    combined.forEach(msg => {
+      uniqueMessagesMap.set(msg.message_id, msg);
+    });
+
+    return Array.from(uniqueMessagesMap.values()).sort(
+      (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+    );
   }, [sortedMessages, messages, selectedC_IdRef.current]);
 
   useEffect(() => {
@@ -136,25 +144,48 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
       socket.emit(SocketEvents.CLIENT_CHAT_STOP_TYPING, {
         conversationId: chatId,
       });
-    }, 2000);
+    }, 1000);
   };
 
   const handleServerMessageReceive = (data) => {
-    const newMessage = data.recieved_message
-    // If user is currently viewing this chat → mark as read
+    const newMessage = data.recieved_message;
+    const conversationId = newMessage.conversation;
+
     console.log("New message received:", newMessage);
-    dispatch(setLastMessage({
-      conversationId: chatId, message: newMessage
-    }));
-    if (newMessage.conversation === chatId) {
+
+    const isOwnMessage = newMessage.sender._id === myUserId;
+    const isCurrentChatOpen = conversationId === chatId;
+    console.log("isCurrentChatOpen", isCurrentChatOpen, chatId, conversationId);
+    // Always update last message in the store
+    dispatch(
+      setLastMessage({
+        conversationId,
+        message: newMessage,
+        isOwnMessage,
+      })
+    );
+
+    // If user is currently in this chat → append message and mark as read
+    if (isCurrentChatOpen) {
       setMessages((prev) => [...prev, newMessage]);
 
       socket.emit(SocketEvents.CLIENT_CHAT_READ, {
-        conversationId: chatId,
+        conversationId,
         messageId: newMessage.message_id,
       });
     }
-  }
+
+    // 🔹 Increment unread count if:
+    //   - it's not my own message
+    //   - the chat is NOT currently open
+    if (!isOwnMessage && !isCurrentChatOpen) {
+      console.log("Incrementing unread for conversation:", conversationId);
+      dispatch(incrementUnread({ conversationId }));
+    }
+    // Update sidebar order
+    updateSidebarOrder();
+  };
+
 
   const handleServerChatMessageStatus = (data) => {
     // only update if this conversation is open
@@ -177,6 +208,7 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
       handleServerMessageReceive(data);
     });
     socket.on(SocketEvents.SERVER_CHAT_MESSAGE_STATUS, (data) => {
+      // console.log("Message status update received:", data);
       handleServerChatMessageStatus(data);
     });
     return () => {
@@ -213,6 +245,8 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef }) => {
         seenMessagesRef.current.add(msg.message_id);
       }
     });
+
+    dispatch(clearUnread({ conversationId: chatId }));
   }, [chatId, allMessages, socket]);
 
 

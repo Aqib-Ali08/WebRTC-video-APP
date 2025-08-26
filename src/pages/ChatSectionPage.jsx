@@ -24,7 +24,7 @@ import { useSocket } from "../context/socketContext";
 import { getCurrentUserId, handleGetUsersChat } from "../services";
 import ChatRoomPage from "./ChatRoomPage";
 import SocketEvents from "../constants/socketEvent";
-import { setLastMessage, setTypingStatus } from "../redux/slices/chatSlice";
+import { incrementUnread, setLastMessage, setTypingStatus, setUnreadCount } from "../redux/slices/chatSlice";
 
 const ChatSectionPage = () => {
   const socket = useSocket();
@@ -33,6 +33,7 @@ const ChatSectionPage = () => {
   const usersStatus = useSelector((state) => state.chat.usersStatus);
   const typingStatus = useSelector((state) => state.chat.typingStatus);
   const lastMessages = useSelector((state) => state.chat.lastMessages);
+  const unreadCounts = useSelector((state) => state.chat.unreadCounts);
   const selectedC_IdRef = useRef();
   const myUserId = getCurrentUserId();
   const [roomPageProps, setRoomPageProps] = useState({});
@@ -41,20 +42,40 @@ const ChatSectionPage = () => {
     console.log("usersStatus", usersStatus);
   }, [usersStatus]);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["userChat"],
     queryFn: handleGetUsersChat,
     refetchOnWindowFocus: false,
   });
 
   console.log("Data", data);
+
+  useEffect(() => {
+    if (!data) return;
+
+    data.forEach((item) => {
+      // dispatch(setUnreadCount({
+      //   conversationId: item.conversationId,
+      //   count: item.unreadCount || 0,
+      // }));
+      dispatch(setUnreadCount({ conversationId: item.conversationId, count: item.unreadCount || 0 }))
+
+    });
+  }, [data, dispatch]);
+
   const handleServerMessageReceive = (data) => {
     const newMessage = data.recieved_message
     // If user is currently viewing this chat → mark as read
-    console.log("New message received:", newMessage);
+    console.log("New message received at sidebar:", newMessage);
     dispatch(setLastMessage({
       conversationId: newMessage.conversation, message: newMessage
     }))
+    if (newMessage.sender._id === myUserId)
+      return;
+    else
+      dispatch(incrementUnread({ conversationId: newMessage.conversation }));
+    // to update the sidebar 
+    refetch();
   }
   useEffect(() => {
     if (!socket || !data?.length) return;
@@ -63,13 +84,13 @@ const ChatSectionPage = () => {
     const conversationIds = data.map(c => c.conversationId);
 
     // Fire join all event
-    socket.emit(SocketEvents.CLIENT_CHAT_JOIN_ALL, { conversationIds });
+    // socket.emit(SocketEvents.CLIENT_CHAT_JOIN_ALL, { conversationIds });
     socket.on(SocketEvents.SERVER_CHAT_RECEIVE, (data) => {
       handleServerMessageReceive(data);
     });
     return () => {
       // Fire leave all event on cleanup
-      socket.emit(SocketEvents.CLIENT_CHAT_LEAVE_ALL, { conversationIds });
+      // socket.emit(SocketEvents.CLIENT_CHAT_LEAVE_ALL, { conversationIds });
       socket.off(SocketEvents.SERVER_CHAT_RECEIVE);
 
     }
@@ -189,7 +210,7 @@ const ChatSectionPage = () => {
           <List sx={{ overflowY: "auto", flex: 1 }}>
             {data?.map((item, i) => {
               const isDirect = item.type === "direct";
-              const participant = item.participants?.[0];
+              const participants = item.participants?.[0];
 
               let formattedPaymentTime = "";
               if (item.lastMessage?.createdAt) {
@@ -209,8 +230,8 @@ const ChatSectionPage = () => {
                 convTyping &&
                 Object.values(convTyping).some((u) => u.typing === true);
               const lastMessage = lastMessages[item.conversationId] || item?.lastMessage;
-              const isMine = lastMessage?.sender === myUserId
-              console.log("lastMessage", lastMessage.content)
+              const isMine = lastMessage?.sender._id === myUserId
+              console.log("unreadCounts", unreadCounts);
               return (
                 <ListItem
                   key={i}
@@ -219,13 +240,13 @@ const ChatSectionPage = () => {
                   onClick={() => {
                     handleChatClick(item.conversationId);
                     setRoomPageProps({
-                      fullName: participant?.full_name,
-                      profilePic: participant?.profilePic,
-                      userId: participant?._id,
+                      fullName: participants?.full_name,
+                      profilePic: participants?.profilePic,
+                      userId: participants?._id,
                     });
                   }}
                 >
-                  <ListItemButton>
+                  <ListItemButton sx={{ px: 1 }}>
                     <ListItemAvatar>
                       <Badge
                         overlap="circular"
@@ -235,7 +256,7 @@ const ChatSectionPage = () => {
                           horizontal: "right",
                         }}
                         color={
-                          usersStatus?.[participant?._id]?.online
+                          usersStatus?.[participants?._id]?.online
                             ? "success"
                             : "default"
                         }
@@ -244,22 +265,55 @@ const ChatSectionPage = () => {
                         <Avatar
                           src={
                             isDirect
-                              ? participant?.profilePic
+                              ? participants?.profilePic
                               : item.groupAvatar
                           }
                           sx={{ bgcolor: "#0e7490" }}
                         >
                           {(isDirect
-                            ? participant?.full_name?.[0]
+                            ? participants?.full_name?.[0]
                             : item.groupName?.[0]) || ""}
                         </Avatar>
                       </Badge>
                     </ListItemAvatar>
                     <ListItemText
                       primary={
-                        <Typography variant="body1">
-                          {isDirect ? participant?.full_name : item.groupName}
-                        </Typography>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 1,
+                            width: "100%",
+                          }}
+                        >
+                          <Typography variant="body1">
+                            {isDirect ? participants?.full_name : item.groupName}
+                          </Typography>
+                          <Box
+                            sx={{ display: "flex", alignItems: "center" }}
+                          >
+                            {unreadCounts[item.conversationId] > 0 && (
+                              <Badge
+                                badgeContent={unreadCounts[item.conversationId] > 99 ? "99+" : unreadCounts[item.conversationId]}
+                                color="error"
+                                overlap="circular"
+                                anchorOrigin={{
+                                  vertical: "top",
+                                  horizontal: "right",
+                                }}
+                              />
+                            )}
+                            <IconButton
+                              size="small"
+                              className="hoverIcon"
+                              sx={{ opacity: 0, transition: "opacity 0.2s ease" }}
+                            >
+                              <MoreVert sx={{ fontSize: "20px" }} />
+                            </IconButton>
+                          </Box>
+                        </Box>
                       }
                       secondary={
                         <Box
@@ -283,20 +337,20 @@ const ChatSectionPage = () => {
                             }}
                           >
                             {/* ✅ Show tick only if it's my outgoing message */}
-                            {lastMessage && lastMessage.sender === myUserId && !isSomeoneTyping && (
+                            {lastMessage && lastMessage.sender._id === myUserId && !isSomeoneTyping && (
                               <Typography
                                 component="span"
                                 variant="caption"
                                 sx={{ color: "text.secondary", flexShrink: 0 }}
                               >
-                                {lastMessage.readBy?.includes(participant?._id) ? 
-                                <DoneAll
-                                  fontSize="small"
-                                  sx={{ color: "#4fc3f7", fontSize: "1rem" }} // blue double tick if read
-                                /> : <Done
-                                  fontSize="small"
-                                  sx={{ color: isMine ? "rgba(0, 0, 0, 0.7)" : "gray", fontSize: "1rem" }}
-                                />}
+                                {lastMessage.readBy?.includes(participants?._id) ?
+                                  <DoneAll
+                                    fontSize="small"
+                                    sx={{ color: "#4fc3f7", fontSize: "1rem" }} // blue double tick if read
+                                  /> : <Done
+                                    fontSize="small"
+                                    sx={{ color: isMine ? "rgba(0, 0, 0, 0.7)" : "gray", fontSize: "1rem" }}
+                                  />}
                               </Typography>
                             )}
 
@@ -312,7 +366,7 @@ const ChatSectionPage = () => {
                                 fontWeight:
                                   isSomeoneTyping
                                     ? 800 // bold italic for typing
-                                    : lastMessage && lastMessage.sender !== myUserId && !lastMessage.readBy?.includes(participant?._id)
+                                    : lastMessage && lastMessage.sender._id !== myUserId && !lastMessage.readBy?.includes(myUserId)
                                       ? 700 // bold for unread incoming
                                       : 400, // normal otherwise
                               }}
@@ -332,13 +386,7 @@ const ChatSectionPage = () => {
 
                       }
                     />
-                    <IconButton
-                      size="small"
-                      className="hoverIcon"
-                      sx={{ opacity: 0, transition: "opacity 0.2s ease" }}
-                    >
-                      <MoreVert sx={{ fontSize: "20px" }} />
-                    </IconButton>
+
                   </ListItemButton>
                 </ListItem>
               );
@@ -349,6 +397,7 @@ const ChatSectionPage = () => {
       <ChatRoomPage
         selectedC_IdRef={selectedC_IdRef}
         roomPageProps={roomPageProps}
+        updateSidebarOrder={refetch}
       />
     </Box>
   );
