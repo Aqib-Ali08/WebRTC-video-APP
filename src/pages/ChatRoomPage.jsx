@@ -1,45 +1,66 @@
 import {
-  AddIcCall,
-  AttachFile,
-  Done,
-  DoneAll,
-  EmojiEmotions,
-  MoreVert,
-  Send,
-  VideoCall,
+  Block,
+  ChevronRight,
+  Delete,
+  Search,
+  Visibility,
 } from "@mui/icons-material";
-import {
-  Avatar,
-  Box,
-  IconButton,
-  InputAdornment,
-  Paper,
-  Skeleton,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUserId, handleGetUserChatHistory } from "../services";
 import SocketEvents from "../constants/socketEvent";
 import { useSocket } from "../context/socketContext";
-import { debounce, get } from "lodash";
-import { clearUnread, incrementUnread, setLastMessage, updateLastMessageStatus } from "../redux/slices/chatSlice";
+import { debounce } from "lodash";
+import {
+  clearUnread,
+  incrementUnread,
+  setLastMessage,
+  updateLastMessageStatus,
+} from "../redux/slices/chatSlice";
+import PopoverComp from "../components/PopoverComp";
+import ChatHeader from "../components/ChatHeader";
+import ChatInput from "../components/ChatInput";
+import MessageList from "../components/MessageList";
+import Lottie from "lottie-react";
+import emptyChat from "../../src/assets/consultation-hover-conversation.json";
 
-const loggedInUserId = getCurrentUserId();
-
-const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) => {
+const ChatRoomPage = ({
+  roomPageProps,
+  selectedC_IdRef,
+  updateSidebarOrder,
+}) => {
+  const loggedInUserId = getCurrentUserId();
   const socket = useSocket();
+  const dispatch = useDispatch();
   const chatId = selectedC_IdRef?.current || null;
   const [typeQuery, setTypeQuery] = useState("");
   const [messages, setMessages] = useState([]);
-  const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const usersStatus = useSelector((state) => state.chat.usersStatus);
-  const myUserId = getCurrentUserId();
   const typingStatus = useSelector((state) => state.chat.typingStatus);
 
+  // emoji picker function
+  const handleEmojiClick = (emojiData) => {
+    setTypeQuery((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // popover open function
+  const handleOpen = (event) => setAnchorEl(event.currentTarget);
+
+  // popover close function
+  const handleClose = () => setAnchorEl(null);
+
+  // popover open state
+  const open = Boolean(anchorEl);
+
+  // popover id
+  const id = open ? "popover-a" : undefined;
+
+  // fetch chat history using tanstack query
   const { data, isPending } = useQuery({
     queryKey: ["conversation", chatId],
     queryFn: () => handleGetUserChatHistory(chatId),
@@ -47,75 +68,39 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
     refetchOnWindowFocus: false,
   });
 
-  // Sort messages by createdAt (oldest first)
-  const sortedMessages = useMemo(() => {
-    if (!data) return [];
-    console.log("Fetched chat history:", data);
-    // If data is already an array
-    if (Array.isArray(data)) {
-      return [...data].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
-    }
-
-    // If data is an object with messages property
-    if (Array.isArray(data.messages)) {
-      return [...data.messages].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
-    }
-
-    return [];
-  }, [data]);
-
+  // message ref
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    if (sortedMessages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    }
-  }, [sortedMessages]);
+  // typing indictor ref
+  const typingTimeoutRef = useRef(null);
 
+  // seen message ref
+  const seenMessagesRef = useRef(new Set());
+
+  // send message function
   const handleSendMessage = () => {
     if (!typeQuery.trim()) return;
-
-
     setTypeQuery("");
-
     socket?.emit(SocketEvents.CLIENT_CHAT_SEND, {
       conversationId: chatId,
       text: typeQuery,
     });
-
-
   };
 
+  // combine messages from server and local state, remove duplicates and sort by date
   const allMessages = useMemo(() => {
+    const history = Array.isArray(data) ? data : data?.messages || [];
     const combined = [
-      ...sortedMessages,
-      ...messages.filter((m) => m.conversation === selectedC_IdRef.current),
+      ...history,
+      ...messages.filter((m) => m.conversation === chatId),
     ];
 
-    // Remove duplicates by message_id
-    const uniqueMessagesMap = new Map();
-    combined.forEach(msg => {
-      uniqueMessagesMap.set(msg.message_id, msg);
-    });
+    return Object.values(
+      Object.fromEntries(combined.map((m) => [m.message_id, m]))
+    ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }, [data, messages, chatId]);
 
-    return Array.from(uniqueMessagesMap.values()).sort(
-      (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-    );
-  }, [sortedMessages, messages, selectedC_IdRef.current]);
-
-  useEffect(() => {
-    if (allMessages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [allMessages]);
-
-  const typingTimeoutRef = useRef(null);
-
-  // debounce
+  // debounce to avoid multiple emits
   const emitTyping = useMemo(
     () =>
       debounce((conversationId) => {
@@ -128,18 +113,16 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
     [socket]
   );
 
+  // typing function
   const handleTyping = (e) => {
     setTypeQuery(e.target.value);
     if (!socket && !chatId) return;
-
-    // debounced
-    emitTyping(chatId);
+    emitTyping(chatId); // debounced
 
     // Reset "stop typing" timer
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-
     typingTimeoutRef.current = setTimeout(() => {
       socket.emit(SocketEvents.CLIENT_CHAT_STOP_TYPING, {
         conversationId: chatId,
@@ -147,13 +130,12 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
     }, 1000);
   };
 
+  // handle incoming messages from server
   const handleServerMessageReceive = (data) => {
     const newMessage = data.recieved_message;
     const conversationId = newMessage.conversation;
-
     console.log("New message received:", newMessage);
-
-    const isOwnMessage = newMessage.sender._id === myUserId;
+    const isOwnMessage = newMessage.sender._id === loggedInUserId;
     const isCurrentChatOpen = conversationId === chatId;
     console.log("isCurrentChatOpen", isCurrentChatOpen, chatId, conversationId);
     // Always update last message in the store
@@ -186,7 +168,7 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
     updateSidebarOrder();
   };
 
-
+  // handle message status updates from server
   const handleServerChatMessageStatus = (data) => {
     // only update if this conversation is open
     const { conversationId, messageId, status, userId } = data;
@@ -200,8 +182,7 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
       );
     }
     dispatch(updateLastMessageStatus(data));
-  }
-
+  };
 
   useEffect(() => {
     socket.on(SocketEvents.SERVER_CHAT_RECEIVE, (data) => {
@@ -223,11 +204,8 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
       }
       socket.off(SocketEvents.SERVER_CHAT_RECEIVE);
       socket.off(SocketEvents.SERVER_CHAT_MESSAGE_STATUS);
-
     };
   }, [socket, chatId, emitTyping]);
-
-  const seenMessagesRef = useRef(new Set());
 
   useEffect(() => {
     if (!chatId || allMessages.length === 0) return;
@@ -249,10 +227,17 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
     dispatch(clearUnread({ conversationId: chatId }));
   }, [chatId, allMessages, socket]);
 
-
   const convTyping = typingStatus?.[chatId] || {};
   const isSomeoneTyping =
-    convTyping && Object.values(convTyping).some((u) => u.typing === true);
+    convTyping && Object.values(convTyping || {}).some((u) => u.typing);
+
+  // popover action buttons
+  const popoverActions = [
+    { label: "View Connection", icon: <Visibility /> },
+    { label: "Search", icon: <Search /> },
+    { label: "Block Chat", icon: <Block /> },
+    { label: "Delete Chat", icon: <Delete /> },
+  ];
 
   return (
     <Box
@@ -270,263 +255,81 @@ const ChatRoomPage = ({ roomPageProps, selectedC_IdRef, updateSidebarOrder }) =>
           width="70vw"
         >
           {/* Header */}
-          <Box
-            p={1}
-            borderBottom={1}
-            borderColor="divider"
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
+          <ChatHeader
+            roomPageProps={roomPageProps}
+            usersStatus={usersStatus}
+            handleOpen={handleOpen}
+            id={id}
+          />
+          <PopoverComp
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleClose}
           >
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Avatar
-                src={roomPageProps.profilePic}
-                alt={roomPageProps.fullName}
-                sx={{ mr: 1, bgcolor: "#0e7490" }}
-              ></Avatar>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <Typography variant="h6">{roomPageProps.fullName}</Typography>
-                <Typography
-                  variant="body2"
-                  color={
-                    usersStatus?.[roomPageProps.userId]?.online === true
-                      ? "green"
-                      : "gray"
-                  }
-                  fontWeight={
-                    usersStatus?.[roomPageProps.userId]?.online === true &&
-                    "bold"
-                  }
-                >
-                  {usersStatus?.[roomPageProps.userId]?.online
-                    ? "Online"
-                    : usersStatus?.[roomPageProps.userId]?.lastSeen
-                      ? `Last seen: ${new Date(
-                        usersStatus[roomPageProps.userId].lastSeen
-                      ).toLocaleString([], {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}`
-                      : ""}
-                </Typography>
-              </Box>
-            </Box>
-            <Box>
-              <Tooltip title="Audio Call">
-                <IconButton>
-                  <AddIcCall />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Video Call">
-                <IconButton>
-                  <VideoCall />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="More">
-                <IconButton>
-                  <MoreVert />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
-
-          {/* Messages area */}
-          <Box
-            flex={1}
-            p={2}
-            display="flex"
-            flexDirection="column"
-            gap={1}
-            overflow="auto"
-            bgcolor="#f5f5f5"
-          >
-            {isPending
-              ? Array.from(new Array(6)).map((_, index) => {
-                const alignLeft = index % 2 === 0;
-                return (
-                  <Box
-                    key={index}
-                    display="flex"
-                    justifyContent={alignLeft ? "flex-start" : "flex-end"}
-                  >
-                    <Skeleton
-                      variant="rounded"
-                      width="30%"
-                      height={40}
-                      sx={{
-                        borderRadius: 3,
-                        bgcolor: alignLeft ? "#e0e0e0" : "#b2ebf2",
-                      }}
-                    />
-                  </Box>
-                );
-              })
-              : allMessages.map((msg) => {
-                const isMine = msg.sender._id === loggedInUserId;
-                return (
-                  <Box
-                    key={msg.message_id}
-                    display="flex"
-                    justifyContent={isMine ? "flex-end" : "flex-start"}
-                    alignItems="flex-end"
-                    gap={1}
-                  >
-                    <Paper
-                      sx={{
-                        px: 1.5,
-                        py: 1,
-                        maxWidth: "65%",
-                        borderRadius: 1,
-                        bgcolor: isMine ? "#0e7490" : "#ffffff",
-                        color: isMine ? "white" : "black",
-                        boxShadow: 1,
-                        position: "relative",
-                      }}
-                    >
-                      {/* Message text */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          wordBreak: "break-word",
-                          whiteSpace: "pre-wrap",
-                          fontSize: "0.95rem",
-                          lineHeight: 1.4,
-                          pr: 7, // extra space for timestamp + tick
-                        }}
-                      >
-                        {msg.content}
-                      </Typography>
-
-                      {/* Timestamp + Tick */}
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          bottom: 6,
-                          right: 8,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.3,
-                        }}
-                      >
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontSize: "0.7rem",
-                            color: isMine ? "rgba(255,255,255,0.7)" : "gray",
-                          }}
-                        >
-                          {new Date(msg.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </Typography>
-
-                        {isMine && (
-                          msg.readBy?.includes(roomPageProps.userId) ? (
-                            <DoneAll
-                              fontSize="small"
-                              sx={{ color: "#4fc3f7", fontSize: "1rem" }} // blue double tick if read
-                            />
-                          ) : (
-                            <Done
-                              fontSize="small"
-                              sx={{ color: isMine ? "rgba(255,255,255,0.7)" : "gray", fontSize: "1rem" }}
-                            />
-                          )
-                        )}
-                      </Box>
-                    </Paper>
-                  </Box>
-                );
-              })}
-            <div ref={messagesEndRef} />
-          </Box>
-
-          {/* Typing Indicator (just above input) */}
-          {isSomeoneTyping && (
             <Box
-              px={2}
-              py={1}
-              bgcolor="transparent"
-              display="flex"
-              justifyContent="flex-start"
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: 1,
+                p: 2,
+              }}
             >
-              <Typography variant="body2" color="textSecondary">
-                Typing...
-              </Typography>
+              {popoverActions.map((item, i) => (
+                <Button
+                  key={i}
+                  startIcon={item.icon}
+                  endIcon={<ChevronRight />}
+                >
+                  {item.label}
+                </Button>
+              ))}
             </Box>
+          </PopoverComp>
+
+          {/* message list */}
+          <MessageList
+            isPending={isPending}
+            allMessages={allMessages}
+            loggedInUserId={loggedInUserId}
+            roomPageProps={roomPageProps}
+            messagesEndRef={messagesEndRef}
+            chatId={chatId}
+          />
+
+          {/* typing indicator */}
+          {isSomeoneTyping && (
+            <Typography px={2} py={1} color="textSecondary">
+              Typing...
+            </Typography>
           )}
-          {/* Input area */}
-          <Box
-            p={2}
-            borderTop={1}
-            borderColor="divider"
-            display="flex"
-            alignItems="center"
-            gap={1}
-            bgcolor="#fff"
-          >
-            <TextField
-              value={typeQuery}
-              autoFocus
-              onChange={handleTyping}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault(); // prevent newline
-                  handleSendMessage(); // send
-                }
-              }}
-              fullWidth
-              multiline   // allow new lines
-              minRows={1}
-              maxRows={6}
-              placeholder="Write something..."
-              variant="outlined"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Tooltip title="Add Emoji">
-                      <IconButton>
-                        <EmojiEmotions />
-                      </IconButton>
-                    </Tooltip>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Tooltip title="Add Attachment">
-              <IconButton>
-                <AttachFile />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Send Message">
-              <IconButton color="primary" onClick={handleSendMessage}>
-                <Send />
-              </IconButton>
-            </Tooltip>
-          </Box>
+
+          {/* input box */}
+          <ChatInput
+            typeQuery={typeQuery}
+            handleTyping={handleTyping}
+            handleSendMessage={handleSendMessage}
+            showEmojiPicker={showEmojiPicker}
+            setShowEmojiPicker={setShowEmojiPicker}
+            handleEmojiClick={handleEmojiClick}
+          />
         </Box>
       ) : (
         <Box
           flex={1}
           display="flex"
-          flexDirection="row"
+          flexDirection="column"
           alignItems="center"
           justifyContent="center"
           marginLeft="20rem"
         >
-          <Typography variant="h6" color="textSecondary">
+          <Lottie
+            animationData={emptyChat}
+            loop={true}
+            style={{ width: 200, height: 200 }}
+          />
+          <Typography variant="h6" color="primary" sx={{ fontWeight: "bold" }}>
             Select a chat to start messaging
           </Typography>
         </Box>

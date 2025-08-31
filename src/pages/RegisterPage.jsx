@@ -139,6 +139,7 @@ const RegisterPage = () => {
                     name="username"
                     placeholder="John Doe"
                     margin="normal"
+                    onKeyDown={handleKeyPress}
                   />
                   <ErrorMessage
                     name="name"
@@ -153,6 +154,7 @@ const RegisterPage = () => {
                     placeholder="john@example.com"
                     name="email"
                     margin="normal"
+                    onKeyDown={handleKeyPress}
                   />
                   <ErrorMessage
                     name="email"
@@ -168,6 +170,7 @@ const RegisterPage = () => {
                     type={showPassword ? "text" : "password"}
                     name="password"
                     margin="normal"
+                    onKeyDown={handleKeyPress}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
@@ -195,6 +198,7 @@ const RegisterPage = () => {
                     type={showPassword ? "text" : "password"}
                     name="confirmPassword"
                     margin="normal"
+                    onKeyDown={handleKeyPress}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
@@ -213,51 +217,6 @@ const RegisterPage = () => {
                     component="div"
                     style={{ color: "red", fontSize: "12px", mb: "10px" }}
                   />
-
-                  {/* <FormControlLabel
-                    control={
-                      <Checkbox
-                        size="small"
-                        sx={{
-                          padding: 0,
-                          "& .MuiSvgIcon-root": {
-                            fontSize: 18,
-                          },
-                        }}
-                      />
-                    }
-                    label="I agree to the Terms & Conditions"
-                    sx={{
-                      marginLeft: 0,
-                      "& .MuiFormControlLabel-label": {
-                        fontSize: "12px",
-                      },
-                      gap: "4px",
-                    }}
-                  /> */}
-
-                  {/* <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      fullWidth
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        mt: 2,
-                        borderRadius: "999px",
-                        background:
-                          "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                        color: "#fff",
-                        boxShadow: "0 4px 14px rgba(0,0,0,0.1)",
-                        textTransform: "none",
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      Register
-                    </Button>
-                  </motion.div> */}
 
                   <motion.div
                     whileHover={{ scale: 1.05 }}

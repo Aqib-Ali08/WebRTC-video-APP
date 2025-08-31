@@ -1,7 +1,7 @@
-import { Box, Paper, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Paper, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import AllNotes from "./AllNotes";
-import SharedNotes from "./SharedNotes";
+import SharedNotes from "../components/SharedNotes";
 
 function TabPanel({ children, value, index }) {
   return (

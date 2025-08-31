@@ -70,7 +70,7 @@ const LoginPage = () => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.target.target === "Enter") {
+    if (e.target.value === "Enter") {
       handleSubmit();
     }
   };
@@ -123,6 +123,7 @@ const LoginPage = () => {
                     name="username"
                     margin="normal"
                     disabled={loading}
+                    onKeyPress={handleKeyPress}
                   />
                   <ErrorMessage
                     name="username"
@@ -139,6 +140,7 @@ const LoginPage = () => {
                     name="password"
                     margin="normal"
                     disabled={loading}
+                    onKeyPress={handleKeyPress}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">

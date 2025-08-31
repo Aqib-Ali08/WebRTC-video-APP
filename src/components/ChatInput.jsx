@@ -1,0 +1,75 @@
+import { AttachFile, EmojiEmotions, Send } from "@mui/icons-material";
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Tooltip,
+} from "@mui/material";
+import EmojiPicker from "emoji-picker-react";
+
+export default function ChatInput({
+  typeQuery,
+  handleTyping,
+  handleSendMessage,
+  showEmojiPicker,
+  setShowEmojiPicker,
+  handleEmojiClick,
+}) {
+  return (
+    <Box
+      p={2}
+      borderTop={1}
+      borderColor="divider"
+      display="flex"
+      alignItems="center"
+      gap={1}
+      bgcolor="#fff"
+    >
+      <TextField
+        value={typeQuery}
+        autoFocus
+        onChange={handleTyping}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+          }
+        }}
+        fullWidth
+        multiline
+        minRows={1}
+        maxRows={6}
+        placeholder="Write something..."
+        variant="outlined"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <Tooltip title="Add Emoji">
+                <IconButton onClick={() => setShowEmojiPicker((prev) => !prev)}>
+                  <EmojiEmotions />
+                </IconButton>
+              </Tooltip>
+            </InputAdornment>
+          ),
+        }}
+      />
+      <Tooltip title="Add Attachment">
+        <IconButton>
+          <AttachFile />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Send Message">
+        <IconButton color="primary" onClick={handleSendMessage}>
+          <Send />
+        </IconButton>
+      </Tooltip>
+
+      {showEmojiPicker && (
+        <Box position="absolute" bottom={60} right={60} zIndex={1000}>
+          <EmojiPicker onEmojiClick={handleEmojiClick} />
+        </Box>
+      )}
+    </Box>
+  );
+}

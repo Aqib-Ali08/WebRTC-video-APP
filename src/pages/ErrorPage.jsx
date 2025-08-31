@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 // import errorSVG from "../assets/error.svg"; // Place your svg here
 import Lottie from "lottie-react";
 import pageNotFound from "../assets/404-page.json";
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 const ErrorPage = () => {
   const navigate = useNavigate();
@@ -17,11 +17,6 @@ const ErrorPage = () => {
       flexDirection="column"
       p={2}
     >
-      {/* <img src={errorSVG} alt="Error Illustration" style={{ maxWidth: '400px', width: '100%', marginBottom: '2rem' }} /> */}
-
-      {/* <Typography variant="h3" fontWeight={700} fontFamily="Questrial" mb={1}>
-        Oops!
-      </Typography> */}
       <Lottie
         animationData={pageNotFound}
         loop={true}
