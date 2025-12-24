@@ -2,14 +2,29 @@ import {
   Block,
   ChevronRight,
   Delete,
-  Search,
+  // Search,
   Visibility,
 } from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUserId, handleGetUserChatHistory } from "../services";
+import {
+  getCurrentUserId,
+  handleBlockChat,
+  handleDeleteChat,
+  handleGetUserBlockStatus,
+  handleGetUserChatHistory,
+} from "../services";
 import SocketEvents from "../constants/socketEvent";
 import { useSocket } from "../context/socketContext";
 import { debounce } from "lodash";
@@ -31,6 +46,7 @@ const ChatRoomPage = ({
   selectedC_IdRef,
   updateSidebarOrder,
 }) => {
+  const queryClient = useQueryClient();
   const loggedInUserId = getCurrentUserId();
   const socket = useSocket();
   const dispatch = useDispatch();
@@ -41,6 +57,12 @@ const ChatRoomPage = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const usersStatus = useSelector((state) => state.chat.usersStatus);
   const typingStatus = useSelector((state) => state.chat.typingStatus);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState(null);
+
+  const handleClickClose = () => {
+    setDialogOpen(false);
+  };
 
   // emoji picker function
   const handleEmojiClick = (emojiData) => {
@@ -64,6 +86,13 @@ const ChatRoomPage = ({
   const { data, isPending } = useQuery({
     queryKey: ["conversation", chatId],
     queryFn: () => handleGetUserChatHistory(chatId),
+    enabled: !!chatId,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: blockedData, refetch } = useQuery({
+    queryKey: ["userBlock", chatId],
+    queryFn: () => handleGetUserBlockStatus(chatId),
     enabled: !!chatId,
     refetchOnWindowFocus: false,
   });
@@ -231,110 +260,253 @@ const ChatRoomPage = ({
   const isSomeoneTyping =
     convTyping && Object.values(convTyping || {}).some((u) => u.typing);
 
+  // delete chat function
+  const deleteChatMutation = useMutation({
+    mutationFn: (chatId) => handleDeleteChat(chatId),
+    onSuccess: (_, chatId) => {
+      // Clear conversation messages (chatroom)
+      queryClient.setQueryData(["conversation", chatId], { messages: [] });
+      setMessages([]);
+
+      // Clear sidebar lastMessage (Redux)
+      dispatch(setLastMessage({ conversationId: chatId, message: null }));
+
+      // Clear sidebar cache (React Query)
+      queryClient.setQueryData(["userChat"], (old) =>
+        old?.map((item) =>
+          item.conversationId === chatId
+            ? { ...item, lastMessage: null, updatedAt: null }
+            : item
+        )
+      );
+    },
+  });
+
+  // block chat function
+  const blockChatMutation = useMutation({
+    mutationFn: (chatId) => handleBlockChat(chatId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userChat"] });
+      refetch();
+    },
+  });
+
+  const handleClearChat = () => {
+    setDialogType("clear");
+    setDialogOpen(true);
+    dispatch(setLastMessage({ conversationId, message: [] }));
+  };
+
+  const handleBlockUnblockChat = () => {
+    setDialogType("block");
+    setDialogOpen(true);
+  };
+
+  const isBlocked = blockedData?.blockedBy;
+
   // popover action buttons
   const popoverActions = [
     { label: "View Connection", icon: <Visibility /> },
-    { label: "Search", icon: <Search /> },
-    { label: "Block Chat", icon: <Block /> },
-    { label: "Delete Chat", icon: <Delete /> },
+    // { label: "Search", icon: <Search /> },
+    {
+      label: isBlocked === "you" ? "Unblock Chat" : "Block Chat",
+      icon: <Block />,
+      onClick: handleBlockUnblockChat,
+    },
+    { label: "Clear Chat", icon: <Delete />, onClick: handleClearChat },
   ];
 
   return (
-    <Box
-      sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}
-    >
-      {chatId ? (
-        <Box
-          flex={1}
-          display="flex"
-          flexDirection="column"
-          borderLeft={1}
-          borderRight={1}
-          borderColor="divider"
-          height="100vh"
-          width="70vw"
-        >
-          {/* Header */}
-          <ChatHeader
-            roomPageProps={roomPageProps}
-            usersStatus={usersStatus}
-            handleOpen={handleOpen}
-            id={id}
-          />
-          <PopoverComp
-            id={id}
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
+    <>
+      <Box
+        sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}
+      >
+        {chatId ? (
+          <Box
+            flex={1}
+            display="flex"
+            flexDirection="column"
+            borderLeft={1}
+            borderRight={1}
+            borderColor="divider"
+            height="100vh"
+            width="70vw"
           >
+            {/* Header */}
+            <ChatHeader
+              roomPageProps={roomPageProps}
+              usersStatus={usersStatus}
+              handleOpen={handleOpen}
+              id={id}
+            />
+            <PopoverComp
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: 1,
+                  p: 2,
+                }}
+              >
+                {popoverActions.map((item, i) => (
+                  <Button
+                    key={i}
+                    startIcon={item.icon}
+                    endIcon={<ChevronRight />}
+                    onClick={() => {
+                      if (item.label === "Clear Chat") {
+                        handleClearChat();
+                      } else if (item.label === "Block Chat" || item.label === "Unblock Chat") {
+                        handleBlockUnblockChat();
+                      } else {
+                        handleClickClose();
+                      }
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </Box>
+            </PopoverComp>
+
+            {/* message list */}
+            <MessageList
+              isPending={isPending}
+              allMessages={allMessages}
+              loggedInUserId={loggedInUserId}
+              roomPageProps={roomPageProps}
+              messagesEndRef={messagesEndRef}
+              chatId={chatId}
+            />
+
+            {/* typing indicator */}
+            {isSomeoneTyping && (
+              <Typography px={2} py={1} color="textSecondary">
+                Typing...
+              </Typography>
+            )}
+
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: 1,
-                p: 2,
+                textAlign: "center",
+                color: "black",
+                py: 1,
+                borderRadius: 1,
+                mb: 1,
               }}
             >
-              {popoverActions.map((item, i) => (
-                <Button
-                  key={i}
-                  startIcon={item.icon}
-                  endIcon={<ChevronRight />}
-                >
-                  {item.label}
-                </Button>
-              ))}
+              {isBlocked ? (
+                isBlocked === "you" ? (
+                  <>
+                    <Typography variant="body2">
+                      You have blocked this chat. Unblock to continue messaging.
+                    </Typography>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      sx={{ mt: 1 }}
+                      onClick={() => blockChatMutation.mutate(chatId)}
+                    >
+                      Unblock
+                    </Button>
+                  </>
+                ) : (
+                  <Typography variant="body2">
+                    Unable to send message.
+                  </Typography>
+                )
+              ) : null}
             </Box>
-          </PopoverComp>
 
-          {/* message list */}
-          <MessageList
-            isPending={isPending}
-            allMessages={allMessages}
-            loggedInUserId={loggedInUserId}
-            roomPageProps={roomPageProps}
-            messagesEndRef={messagesEndRef}
-            chatId={chatId}
-          />
-
-          {/* typing indicator */}
-          {isSomeoneTyping && (
-            <Typography px={2} py={1} color="textSecondary">
-              Typing...
+            {/* input box */}
+            <ChatInput
+              typeQuery={typeQuery}
+              handleTyping={handleTyping}
+              handleSendMessage={handleSendMessage}
+              showEmojiPicker={showEmojiPicker}
+              setShowEmojiPicker={setShowEmojiPicker}
+              handleEmojiClick={handleEmojiClick}
+              disabled={isBlocked}
+            />
+          </Box>
+        ) : (
+          <Box
+            flex={1}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            marginLeft="20rem"
+          >
+            <Lottie
+              animationData={emptyChat}
+              loop={true}
+              style={{ width: 200, height: 200 }}
+            />
+            <Typography
+              variant="h6"
+              color="primary"
+              sx={{ fontWeight: "bold" }}
+            >
+              Select a chat to start messaging
             </Typography>
-          )}
+          </Box>
+        )}
+      </Box>
 
-          {/* input box */}
-          <ChatInput
-            typeQuery={typeQuery}
-            handleTyping={handleTyping}
-            handleSendMessage={handleSendMessage}
-            showEmojiPicker={showEmojiPicker}
-            setShowEmojiPicker={setShowEmojiPicker}
-            handleEmojiClick={handleEmojiClick}
-          />
-        </Box>
-      ) : (
-        <Box
-          flex={1}
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          marginLeft="20rem"
-        >
-          <Lottie
-            animationData={emptyChat}
-            loop={true}
-            style={{ width: 200, height: 200 }}
-          />
-          <Typography variant="h6" color="primary" sx={{ fontWeight: "bold" }}>
-            Select a chat to start messaging
-          </Typography>
-        </Box>
-      )}
-    </Box>
+      <Dialog
+        open={dialogOpen}
+        onClose={handleClickClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        {/* {console.log("Dialog render with open:", dialogOpen)} */}
+        <DialogTitle id="alert-dialog-title">
+          {dialogType == "clear"
+            ? "Clear Chat!!"
+            : isBlocked
+              ? "Unblock Chat!!"
+              : "Block Chat!!"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {dialogType === "clear"
+              ? "Are you sure to clear the chat?"
+              : isBlocked === "you"
+                ? "Are you sure to unblock the chat?"
+                : "Are you sure to block the chat?"}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button size="small" variant="outlined" onClick={handleClickClose}>
+            Cancel
+          </Button>
+          <Button
+            size="small"
+            onClick={() => {
+              console.log("Confirm clicked, chatId:", chatId);
+              if (dialogType === "clear") {
+                deleteChatMutation.mutate(chatId);
+              } else {
+                blockChatMutation.mutate(chatId);
+              }
+              handleClickClose();
+              handleClose();
+            }}
+            variant="contained"
+            autoFocus
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

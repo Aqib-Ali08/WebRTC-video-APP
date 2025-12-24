@@ -141,7 +141,7 @@ export default function ChatListItem({
                     }}
                   />
                 )}
-                <IconButton
+                {/* <IconButton
                   size="small"
                   className="hoverIcon"
                   sx={{
@@ -155,7 +155,7 @@ export default function ChatListItem({
                   }}
                 >
                   <MoreVert sx={{ fontSize: "20px" }} />
-                </IconButton>
+                </IconButton> */}
               </Box>
 
               {/* popover */}

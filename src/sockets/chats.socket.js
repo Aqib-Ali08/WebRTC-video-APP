@@ -6,7 +6,13 @@ import {
   setLastMessage,
   incrementUnread,
 } from "../redux/slices/chatSlice";
-export const registerPresenceSocketHandlers = (socket, dispatch) => {
+export const registerPresenceSocketHandlers = (
+  socket,
+  dispatch,
+  myUserId,
+  refetch,
+  selectedC_IdRef
+) => {
   const handlePresenceInit = (users) => {
     // console.log("already available users", users);
     dispatch(setUsersStatus(users.online_users));
@@ -35,7 +41,9 @@ export const registerPresenceSocketHandlers = (socket, dispatch) => {
     // Skip if it's my own message
     if (newMessage.sender._id === myUserId) return;
 
-    dispatch(incrementUnread({ conversationId: newMessage.conversation }));
+    if (selectedC_IdRef?.current !== newMessage.conversation) {
+      dispatch(incrementUnread({ conversationId: newMessage.conversation }));
+    }
     // to update the sidebar
     refetch?.();
   };

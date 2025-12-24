@@ -24,6 +24,7 @@ import {
   PersonAdd,
   Settings,
 } from "@mui/icons-material";
+import { getCurrentUserFullName } from "../services";
 
 const navItems = [
   {
@@ -91,8 +92,9 @@ const navItems = [
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("");
   const [open, setOpen] = useState(false);
+
+  const fullName = getCurrentUserFullName();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -102,31 +104,14 @@ const Sidebar = () => {
     setOpen(false);
   };
 
-
-  useEffect(() => {
-    const sessionStorageData = sessionStorage.getItem("authData");
-    const localStorageData = localStorage.getItem("authData");
-
-    if (sessionStorageData || localStorageData) {
-      try {
-        const authData = JSON.parse(sessionStorageData || localStorageData);
-        const user = authData.user;
-        console.log("user", user);
-        setUserName(user);
-      } catch (e) {
-        console.error("Error parsing authData from sessionStorage", err);
-      }
-    }
-  }, []);
-
   const currentTab = navItems.findIndex((item) =>
     location.pathname.startsWith(item.path)
   );
 
   const firstName =
-    userName
+    fullName
       .split()
-      .map((firstname) => firstname[0])
+      .map((fullName) => fullName[0])
       .join("")
       .toUpperCase() || "User";
 
@@ -148,7 +133,7 @@ const Sidebar = () => {
         overflowY: "auto",
       }}
     >
-      <Tooltip title={userName.toUpperCase()}>
+      <Tooltip title={fullName}>
         <Avatar
           sx={{
             // backgroundColor: "#667eea",

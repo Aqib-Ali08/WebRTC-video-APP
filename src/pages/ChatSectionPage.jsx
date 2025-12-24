@@ -54,10 +54,6 @@ const ChatSectionPage = () => {
     if (!data) return;
 
     data.forEach((item) => {
-      // dispatch(setUnreadCount({
-      //   conversationId: item.conversationId,
-      //   count: item.unreadCount || 0,
-      // }));
       dispatch(
         setUnreadCount({
           conversationId: item.conversationId,
@@ -80,7 +76,6 @@ const ChatSectionPage = () => {
     return receivedMessage;
   }, [socket, data, dispatch, myUserId, refetch]);
 
-  
   useEffect(() => {
     if (!socket) return;
 
@@ -115,12 +110,13 @@ const ChatSectionPage = () => {
     };
   }, [socket, dispatch]);
 
-  const handleChatClick = (conversationId, participants) => {
+  const handleChatClick = (conversationId, participants, blockedBy) => {
     selectedC_IdRef.current = conversationId;
     setRoomPageProps({
       fullName: participants?.full_name,
       profilePic: participants?.profilePic,
       userId: participants?._id,
+      blockedBy,
     });
   };
 
@@ -193,7 +189,13 @@ const ChatSectionPage = () => {
                   typingStatus={typingStatus}
                   unreadCounts={unreadCounts}
                   usersStatus={usersStatus}
-                  onChatClick={handleChatClick}
+                  onChatClick={(conversationId, participants) =>
+                    handleChatClick(
+                      conversationId,
+                      participants,
+                      item.blockedBy
+                    )
+                  }
                 />
               );
             })}

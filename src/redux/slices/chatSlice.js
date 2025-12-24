@@ -32,7 +32,7 @@ const initialState = {
   //   }
   // }
   unreadCounts: {}, // { conversationId: number }
-  totalUnread: 0,// will not use this in UI
+  totalUnread: 0, // will not use this in UI
 };
 
 const chatSlice = createSlice({
@@ -86,6 +86,14 @@ const chatSlice = createSlice({
     },
     setLastMessage: (state, action) => {
       const { conversationId, message } = action.payload;
+
+      if (!message) {
+        // 🔹 Clear last message for this conversation
+        const { [conversationId]: _, ...rest } = state.lastMessages;
+        state.lastMessages = rest;
+        return;
+      }
+
       state.lastMessages = {
         ...state.lastMessages,
         [conversationId]: {
@@ -136,7 +144,6 @@ const chatSlice = createSlice({
       state.unreadCounts = {};
       state.totalUnread = 0;
     },
-
   },
 });
 

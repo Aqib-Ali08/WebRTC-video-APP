@@ -1,106 +1,180 @@
-import { Done, DoneAll } from "@mui/icons-material";
-import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
-import EmojiPicker from "emoji-picker-react";
+import {
+  ChevronRight,
+  DeleteForever,
+  DeleteOutline,
+  Done,
+  DoneAll,
+  MoreVert,
+} from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
-import AddReactionIcon from "@mui/icons-material/AddReaction";
+import PopoverComp from "./PopoverComp";
+import { useMutation } from "@tanstack/react-query";
+import { handleDeleteMessage } from "../services";
+// import EmojiPicker from "emoji-picker-react";
+// import { useState } from "react";
+// import AddReactionIcon from "@mui/icons-material/AddReaction";
 
 export default function MessageBubble({
   msg,
   loggedInUserId,
   roomPageProps,
-  onReact,
+  messageId,
+  // onReact,
 }) {
   const isMine = msg.sender._id === loggedInUserId;
-  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState(null);
+  const [isDeleted, setIsDeleted] = useState(false);
+  // const [showReactionPicker, setShowReactionPicker] = useState(false);
 
-  const handleReactionClick = (_, emojiObject) => {
-    setShowReactionPicker(false);
+  // const handleReactionClick = (_, emojiObject) => {
+  //   setShowReactionPicker(false);
 
-    // 🔥 send reaction back to parent via prop (socket/redux update)
-    if (onReact) {
-      onReact(msg.message_id, emojiObject.emoji);
-    }
+  //   // 🔥 send reaction back to parent via prop (socket/redux update)
+  //   if (onReact) {
+  //     onReact(msg.message_id, emojiObject.emoji);
+  //   }
+  // };
+
+  // popover open function
+  const handleOpen = (event) => setAnchorEl(event.currentTarget);
+
+  // popover close function
+  const handleClose = () => setAnchorEl(null);
+
+  // popover open state
+  const open = Boolean(anchorEl);
+
+  // popover id
+  const id = open ? "popover-a" : undefined;
+
+  // popover action buttons
+  const popoverActions = [
+    { label: "Delete for Me", icon: <DeleteOutline /> },
+    { label: "Delete for All", icon: <DeleteForever /> },
+  ];
+
+  const handleClickClose = () => {
+    setDialogOpen(false);
+    handleClose();
   };
 
-  return (
-    <Box
-      display="flex"
-      justifyContent={isMine ? "flex-end" : "flex-start"}
-      alignItems="flex-end"
-      gap={1}
-    >
-      <Paper
-        sx={{
-          px: 1.5,
-          py: 1,
-          maxWidth: "65%",
-          borderRadius: 1,
-          bgcolor: isMine ? "#0e7490" : "#ffffff",
-          color: isMine ? "white" : "black",
-          boxShadow: 1,
-          position: "relative",
-        }}
-      >
-        {/* Message text */}
-        <Typography
-          variant="body2"
-          sx={{
-            wordBreak: "break-word",
-            whiteSpace: "pre-wrap",
-            fontSize: "0.95rem",
-            lineHeight: 1.4,
-            pr: 10, // extra space for timestamp + tick
-          }}
-        >
-          {msg.content}
-        </Typography>
+  const handleDeleteForMe = () => {
+    setDialogType("deleteForMe");
+    setDialogOpen(true);
+  };
 
-        {/* Timestamp + Tick */}
-        <Box
+  const handleDeleteForAll = () => {
+    setDialogType("deleteForAll");
+    setDialogOpen(true);
+  };
+
+  const deleteMsgMutation  = useMutation({
+    mutationFn: () => handleDeleteMessage(messageId, dialogType),
+    onSuccess: () => {
+      setIsDeleted(true);
+    },
+    onError: (err) => {
+      console.error("Failed to delete:", err);
+    },
+  });
+
+  return (
+    <>
+      <Box
+        display="flex"
+        justifyContent={isMine ? "flex-end" : "flex-start"}
+        alignItems="flex-end"
+        // gap={1}
+      >
+        <Paper
           sx={{
-            position: "absolute",
-            bottom: 6,
-            right: 8,
-            display: "flex",
-            alignItems: "center",
-            gap: 0.3,
+            px: 1.5,
+            py: 1,
+            maxWidth: "65%",
+            borderRadius: 1,
+            bgcolor: isMine ? "#0e7490" : "#ffffff",
+            color: isMine ? "white" : "black",
+            boxShadow: 1,
+            position: "relative",
           }}
         >
+          {/* Message text */}
           <Typography
-            variant="caption"
+            variant="body2"
             sx={{
-              fontSize: "0.7rem",
-              color: isMine ? "rgba(255,255,255,0.7)" : "gray",
+              wordBreak: "break-word",
+              whiteSpace: "pre-wrap",
+              fontSize: "0.95rem",
+              lineHeight: 1.4,
+              pr: 10, // extra space for timestamp + tick
+              fontStyle: isDeleted ? "italic" : "normal",
+              color: isDeleted ? "gray" : isMine ? "white" : "black",
             }}
           >
-            {new Date(msg.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {isDeleted ? "This message was deleted" : msg.content}
           </Typography>
 
-          {isMine &&
-            (msg.readBy?.includes(roomPageProps.userId) ? (
-              <DoneAll
-                fontSize="small"
-                sx={{
-                  color: "#4fc3f7",
-                  fontSize: "1rem",
-                }} // blue double tick if read
-              />
-            ) : (
-              <Done
-                fontSize="small"
-                sx={{
-                  color: isMine ? "rgba(255,255,255,0.7)" : "gray",
-                  fontSize: "1rem",
-                }}
-              />
-            ))}
-        </Box>
+          {/* Timestamp + Tick */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 6,
+              right: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.3,
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: "0.7rem",
+                color: isMine ? "rgba(255,255,255,0.7)" : "gray",
+              }}
+            >
+              {new Date(msg.createdAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Typography>
 
-        {/* Reaction button */}
-        <Tooltip title="React">
+            {isMine &&
+              (msg.readBy?.includes(roomPageProps.userId) ? (
+                <DoneAll
+                  fontSize="small"
+                  sx={{
+                    color: "#4fc3f7",
+                    fontSize: "1rem",
+                  }} // blue double tick if read
+                />
+              ) : (
+                <Done
+                  fontSize="small"
+                  sx={{
+                    color: isMine ? "rgba(255,255,255,0.7)" : "gray",
+                    fontSize: "1rem",
+                  }}
+                />
+              ))}
+          </Box>
+
+          {/* Reaction button */}
+          {/* <Tooltip title="React">
           <IconButton
             size="small"
             sx={{
@@ -115,10 +189,10 @@ export default function MessageBubble({
           >
             <AddReactionIcon sx={{ fontSize: "16px" }} />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
 
-        {/* Emoji Picker */}
-        {showReactionPicker && (
+          {/* Emoji Picker */}
+          {/* {showReactionPicker && (
           <Box position="absolute" bottom={40} right={-10} zIndex={1000}>
             <EmojiPicker
               reactionsDefaultOpen={true} // 👈 show only reactions row
@@ -127,10 +201,10 @@ export default function MessageBubble({
               allowExpandReactions={false} // 👈 prevent full picker
             />
           </Box>
-        )}
+        )} */}
 
-        {/* Show reactions (if any) */}
-        {msg.reactions?.length > 0 && (
+          {/* Show reactions (if any) */}
+          {/* {msg.reactions?.length > 0 && (
           <Box display="flex" gap={0.5} mt={0.5}>
             {msg.reactions.map((reaction, i) => (
               <Box
@@ -145,8 +219,80 @@ export default function MessageBubble({
               </Box>
             ))}
           </Box>
-        )}
-      </Paper>
-    </Box>
+        )} */}
+        </Paper>
+        <IconButton onClick={handleOpen}>
+          <MoreVert fontSize="small" />
+        </IconButton>
+        <PopoverComp
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: 1,
+              p: 2,
+            }}
+          >
+            {popoverActions.map((item, i) => (
+              <Button
+                key={i}
+                startIcon={item.icon}
+                endIcon={<ChevronRight />}
+                onClick={() => {
+                  if (item.label === "Delete for Me") {
+                    handleDeleteForMe();
+                  } else if (item.label === "Delete for All") {
+                    handleDeleteForAll();
+                  } else {
+                    handleClose();
+                  }
+                }}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </Box>
+        </PopoverComp>
+        <Dialog
+          open={dialogOpen}
+          onClose={handleClickClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          {/* {console.log("Dialog render with open:", dialogOpen)} */}
+          <DialogTitle id="alert-dialog-title">Delete Message!!</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {dialogType === "deleteForMe"
+                ? "Are you sure to delete the message for you?"
+                : "Are you sure to delete the message for all?"}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button size="small" variant="outlined" onClick={handleClickClose}>
+              Cancel
+            </Button>
+            <Button
+              size="small"
+              onClick={() => {
+                deleteMsgMutation.mutate();
+                handleClickClose();
+                handleClose();
+              }}
+              variant="contained"
+              autoFocus
+            >
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </>
   );
 }

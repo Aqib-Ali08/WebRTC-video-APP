@@ -33,6 +33,19 @@ export const getCurrentUserId = () => {
   }
 };
 
+export const getCurrentUserFullName = () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    if (!token) return null;
+
+    const decoded = jwtDecode(token);
+    return decoded.full_name || null;
+  } catch (error) {
+    console.error("Invalid token:", error);
+    return null;
+  }
+};
+
 export const handleLogin = async (username, password) => {
   try {
     const response = await axios.post(`${domain}/auth/login`, {
@@ -343,6 +356,108 @@ export const handleGetUserChatHistory = async (chatId) => {
   } catch (error) {
     console.error(
       "Get users chat history failed:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const handleGetUserBlockStatus = async (chatId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.get(
+      `${domain}/chats/get_users_block_status?conversation_id=${chatId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("Get Users Block Chat Status", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Get users block chat status failed:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const handleDeleteChat = async (chatId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.post(
+      `${domain}/chats/clear_chat_history`,
+      {
+        conversationId: chatId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("Chat Deleted Successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Unable to delete chat:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const handleBlockChat = async (chatId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.post(
+      `${domain}/chats/toggle_chat_block_unblock`,
+      {
+        conversationId: chatId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("Chat Blocked Successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Unable to block chat:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const handleDeleteMessage = async (messageId, dialogType) => {
+  try {
+    const token = getTokenFromLocalStorage();
+
+    const response = await axios.post(
+      `${domain}/chats/delete_message`,
+      {
+        messageId,
+        actionType: dialogType
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log("Message Deleted Successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Unable to delete message:",
       error.response?.data || error.message
     );
     throw error;

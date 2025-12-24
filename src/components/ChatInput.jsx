@@ -15,6 +15,7 @@ export default function ChatInput({
   showEmojiPicker,
   setShowEmojiPicker,
   handleEmojiClick,
+  disabled = false,
 }) {
   return (
     <Box
@@ -28,6 +29,7 @@ export default function ChatInput({
     >
       <TextField
         value={typeQuery}
+        disabled={disabled}
         autoFocus
         onChange={handleTyping}
         onKeyDown={(e) => {
@@ -46,7 +48,10 @@ export default function ChatInput({
           endAdornment: (
             <InputAdornment position="end">
               <Tooltip title="Add Emoji">
-                <IconButton onClick={() => setShowEmojiPicker((prev) => !prev)}>
+                <IconButton
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  disabled={disabled}
+                >
                   <EmojiEmotions />
                 </IconButton>
               </Tooltip>
@@ -55,19 +60,23 @@ export default function ChatInput({
         }}
       />
       <Tooltip title="Add Attachment">
-        <IconButton>
+        <IconButton disabled={disabled}>
           <AttachFile />
         </IconButton>
       </Tooltip>
       <Tooltip title="Send Message">
-        <IconButton color="primary" onClick={handleSendMessage}>
+        <IconButton
+          color="primary"
+          onClick={handleSendMessage}
+          disabled={disabled}
+        >
           <Send />
         </IconButton>
       </Tooltip>
 
       {showEmojiPicker && (
         <Box position="absolute" bottom={60} right={60} zIndex={1000}>
-          <EmojiPicker onEmojiClick={handleEmojiClick} />
+          <EmojiPicker onEmojiClick={handleEmojiClick} disabled={disabled} />
         </Box>
       )}
     </Box>

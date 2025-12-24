@@ -29,11 +29,12 @@ import {
   Paper,
   Stack,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import "react-calendar/dist/Calendar.css";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUserFullName, getTokenFromLocalStorage } from "../services";
 
 const analyticsData = [
   {
@@ -71,26 +72,8 @@ const scheduleShortcuts = [
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState("");
 
-  useEffect(() => {
-    const sessionStorageData = sessionStorage.getItem("authData");
-    const localStorageData = localStorage.getItem("authData");
-
-    if (sessionStorageData || localStorageData) {
-      try {
-        const authData = JSON.parse(sessionStorageData || localStorageData);
-        const user = authData.user;
-        console.log("user", user);
-        setFirstName(user);
-      } catch (e) {
-        console.log(
-          "Error parsing username from session storage or local storage",
-          e
-        );
-      }
-    }
-  }, []);
+  const fullName = getCurrentUserFullName();
 
   return (
     <Box
@@ -117,7 +100,7 @@ const HomePage = () => {
           >
             Welcome Back,
           </span>{" "}
-          {firstName.toUpperCase()} 👋
+          {fullName} 👋
         </Typography>
 
         <Tooltip title="Notifications">

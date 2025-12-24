@@ -100,6 +100,7 @@ export default function MessageList({
               msg={msg}
               loggedInUserId={loggedInUserId}
               roomPageProps={roomPageProps}
+              messageId={msg.message_id}
             />
           ))}
       <div ref={messagesEndRef} />
