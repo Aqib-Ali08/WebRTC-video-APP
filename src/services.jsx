@@ -463,3 +463,162 @@ export const handleDeleteMessage = async (messageId, dialogType) => {
     throw error;
   }
 };
+
+// ==========================================
+// NOTES & SHARING APIS
+// ==========================================
+
+export const handleGetNotes = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.get(`${domain}/notes`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get notes failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleCreateNote = async (noteData) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.post(`${domain}/notes`, noteData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Create note failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleUpdateNote = async (noteId, noteData) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.put(`${domain}/notes/${noteId}`, noteData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Update note failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleDeleteNote = async (noteId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.delete(`${domain}/notes/${noteId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Delete note failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleGetSharedNotes = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.get(`${domain}/notes/shared`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get shared notes failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleShareNote = async (noteId, recipientId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.post(
+      `${domain}/notes/shared`,
+      { noteId, recipientId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Share note failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleUnshareNote = async (sharedId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.delete(`${domain}/notes/shared/${sharedId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Unshare note failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleGetNotifications = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.get(`${domain}/notifications`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get notifications failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleMarkNotificationAsRead = async (id) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.put(`${domain}/notifications/${id}/read`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Mark notification as read failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleMarkAllNotificationsAsRead = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.put(`${domain}/notifications/mark-all-read`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Mark all notifications as read failed:", error.response?.data || error.message);
+    throw error;
+  }
+};
+

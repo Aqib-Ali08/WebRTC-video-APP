@@ -17,10 +17,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
-  AddBox,
   CalendarMonth,
   ChatBubble,
   Dashboard,
+  Description,
   PersonAdd,
   Settings,
 } from "@mui/icons-material";
@@ -43,11 +43,11 @@ const navItems = [
     ),
   },
   {
-    path: "/dashboard/connections",
-    label: "Connections",
+    path: "/dashboard/messages",
+    label: "Chats",
     icon: (
       <span style={{ paddingRight: "0.5rem" }}>
-        <PersonAdd />
+        <ChatBubble />
       </span>
     ),
   },
@@ -61,20 +61,20 @@ const navItems = [
     ),
   },
   {
-    path: "/dashboard/messages",
-    label: "Messages",
+    path: "/dashboard/schedule",
+    label: "Notes",
     icon: (
       <span style={{ paddingRight: "0.5rem" }}>
-        <ChatBubble />
+        <Description />
       </span>
     ),
   },
   {
-    path: "/dashboard/schedule",
-    label: "Schedule",
+    path: "/dashboard/connections",
+    label: "Connections",
     icon: (
       <span style={{ paddingRight: "0.5rem" }}>
-        <AddBox />
+        <PersonAdd />
       </span>
     ),
   },
