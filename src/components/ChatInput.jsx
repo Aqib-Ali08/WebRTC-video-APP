@@ -26,6 +26,7 @@ export default function ChatInput({
       alignItems="center"
       gap={1}
       bgcolor="#fff"
+      position="relative"
     >
       <TextField
         value={typeQuery}
@@ -75,7 +76,19 @@ export default function ChatInput({
       </Tooltip>
 
       {showEmojiPicker && (
-        <Box position="absolute" bottom={60} right={60} zIndex={1000}>
+        <Box
+          position="absolute"
+          bottom={80}
+          right={{ xs: 10, sm: 60 }}
+          zIndex={1000}
+          sx={{
+            width: { xs: "calc(100% - 20px)", sm: "auto" },
+            maxWidth: "350px",
+            "& > .EmojiPickerReact": {
+              width: "100% !important",
+            },
+          }}
+        >
           <EmojiPicker onEmojiClick={handleEmojiClick} disabled={disabled} />
         </Box>
       )}

@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import PopoverComp from "./PopoverComp";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleDeleteMessage } from "../services";
 // import EmojiPicker from "emoji-picker-react";
 // import { useState } from "react";
@@ -34,6 +34,7 @@ export default function MessageBubble({
   messageId,
   // onReact,
 }) {
+  const queryClient = useQueryClient();
   const isMine = msg.sender._id === loggedInUserId;
   const [anchorEl, setAnchorEl] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,7 +66,7 @@ export default function MessageBubble({
   // popover action buttons
   const popoverActions = [
     { label: "Delete for Me", icon: <DeleteOutline /> },
-    { label: "Delete for All", icon: <DeleteForever /> },
+    ...(isMine ? [{ label: "Delete for All", icon: <DeleteForever /> }] : []),
   ];
 
   const handleClickClose = () => {
@@ -86,7 +87,13 @@ export default function MessageBubble({
   const deleteMsgMutation  = useMutation({
     mutationFn: () => handleDeleteMessage(messageId, dialogType),
     onSuccess: () => {
-      setIsDeleted(true);
+      // Remove from Query cache!
+      queryClient.setQueryData(["conversation", msg.conversation], (old) => {
+        if (!old) return old;
+        const oldMessages = Array.isArray(old) ? old : old.messages || [];
+        const updatedMessages = oldMessages.filter((m) => m.message_id !== messageId);
+        return Array.isArray(old) ? updatedMessages : { ...old, messages: updatedMessages };
+      });
     },
     onError: (err) => {
       console.error("Failed to delete:", err);

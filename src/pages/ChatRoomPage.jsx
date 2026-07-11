@@ -33,6 +33,8 @@ import {
   incrementUnread,
   setLastMessage,
   updateLastMessageStatus,
+  setActiveChatId,
+  clearActiveChatId,
 } from "../redux/slices/chatSlice";
 import PopoverComp from "../components/PopoverComp";
 import ChatHeader from "../components/ChatHeader";
@@ -45,6 +47,7 @@ const ChatRoomPage = ({
   roomPageProps,
   selectedC_IdRef,
   updateSidebarOrder,
+  onBack,
 }) => {
   const queryClient = useQueryClient();
   const loggedInUserId = getCurrentUserId();
@@ -209,6 +212,18 @@ const ChatRoomPage = ({
             : msg
         )
       );
+
+      // Update TanStack Query history cache!
+      queryClient.setQueryData(["conversation", chatId], (old) => {
+        if (!old) return old;
+        const oldMessages = Array.isArray(old) ? old : old.messages || [];
+        const updatedMessages = oldMessages.map((msg) =>
+          msg.message_id === messageId
+            ? { ...msg, readBy: [...(msg.readBy || []), userId] }
+            : msg
+        );
+        return Array.isArray(old) ? updatedMessages : { ...old, messages: updatedMessages };
+      });
     }
     dispatch(updateLastMessageStatus(data));
   };
@@ -220,6 +235,15 @@ const ChatRoomPage = ({
     socket.on(SocketEvents.SERVER_CHAT_MESSAGE_STATUS, (data) => {
       // console.log("Message status update received:", data);
       handleServerChatMessageStatus(data);
+    });
+    socket.on("server:chat:deleteMessage", ({ messageId }) => {
+      setMessages((prev) => prev.filter((m) => m.message_id !== messageId));
+      queryClient.setQueryData(["conversation", chatId], (old) => {
+        if (!old) return old;
+        const oldMessages = Array.isArray(old) ? old : old.messages || [];
+        const updatedMessages = oldMessages.filter((m) => m.message_id !== messageId);
+        return Array.isArray(old) ? updatedMessages : { ...old, messages: updatedMessages };
+      });
     });
     return () => {
       if (typingTimeoutRef.current) {
@@ -233,11 +257,14 @@ const ChatRoomPage = ({
       }
       socket.off(SocketEvents.SERVER_CHAT_RECEIVE);
       socket.off(SocketEvents.SERVER_CHAT_MESSAGE_STATUS);
+      socket.off("server:chat:deleteMessage");
     };
-  }, [socket, chatId, emitTyping]);
+  }, [socket, chatId, emitTyping, queryClient]);
 
   useEffect(() => {
     if (!chatId || allMessages.length === 0) return;
+
+    let hasUnread = false;
 
     allMessages.forEach((msg) => {
       if (
@@ -250,15 +277,65 @@ const ChatRoomPage = ({
           messageId: msg.message_id,
         });
         seenMessagesRef.current.add(msg.message_id);
+        hasUnread = true;
       }
     });
 
+    if (hasUnread) {
+      // Optimistically update our local TanStack Query cache to include loggedInUserId in readBy
+      queryClient.setQueryData(["conversation", chatId], (old) => {
+        if (!old) return old;
+        const oldMessages = Array.isArray(old) ? old : old.messages || [];
+        const updatedMessages = oldMessages.map((msg) => {
+          if (
+            msg.sender._id !== loggedInUserId &&
+            !(msg.readBy || []).includes(loggedInUserId)
+          ) {
+            return { ...msg, readBy: [...(msg.readBy || []), loggedInUserId] };
+          }
+          return msg;
+        });
+        return Array.isArray(old) ? updatedMessages : { ...old, messages: updatedMessages };
+      });
+    }
+
     dispatch(clearUnread({ conversationId: chatId }));
-  }, [chatId, allMessages, socket]);
+  }, [chatId, allMessages, socket, loggedInUserId, queryClient]);
+
+  useEffect(() => {
+    if (chatId) {
+      dispatch(setActiveChatId(chatId));
+    }
+    return () => {
+      dispatch(clearActiveChatId());
+    };
+  }, [chatId, dispatch]);
 
   const convTyping = typingStatus?.[chatId] || {};
-  const isSomeoneTyping =
-    convTyping && Object.values(convTyping || {}).some((u) => u.typing);
+  
+  const typingUserIds = useMemo(() => {
+    return Object.keys(convTyping || {}).filter(
+      (uid) => uid !== loggedInUserId && convTyping[uid]?.typing
+    );
+  }, [convTyping, loggedInUserId]);
+
+  const isSomeoneTyping = typingUserIds.length > 0;
+
+  const typingUserName = useMemo(() => {
+    if (!isSomeoneTyping) return "";
+    if (roomPageProps?.fullName && typingUserIds.includes(roomPageProps.userId)) {
+      return roomPageProps.fullName;
+    }
+    const activeChats = queryClient.getQueryData(["userChat"]);
+    const activeConversation = activeChats?.find((c) => c.conversationId === chatId);
+    for (const uid of typingUserIds) {
+      const participant = activeConversation?.participants?.find((p) => p._id === uid);
+      if (participant?.full_name) {
+        return participant.full_name;
+      }
+    }
+    return "Someone";
+  }, [isSomeoneTyping, typingUserIds, roomPageProps, chatId, queryClient]);
 
   // delete chat function
   const deleteChatMutation = useMutation({
@@ -319,18 +396,28 @@ const ChatRoomPage = ({
   return (
     <>
       <Box
-        sx={{ display: "flex", flexDirection: "row", justifyContent: "center" }}
+        sx={{
+          display: { xs: chatId ? "flex" : "none", md: "flex" },
+          flexDirection: "row",
+          justifyContent: "center",
+          flex: 1,
+          height: "100vh",
+          width: "100%",
+        }}
       >
         {chatId ? (
           <Box
-            flex={1}
-            display="flex"
-            flexDirection="column"
-            borderLeft={1}
-            borderRight={1}
-            borderColor="divider"
-            height="100vh"
-            width="70vw"
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              borderLeft: { xs: 0, md: 1 },
+              borderRight: { xs: 0, md: 1 },
+              borderColor: "divider",
+              height: "100vh",
+              width: "100%",
+              bgcolor: "#f9fafb",
+            }}
           >
             {/* Header */}
             <ChatHeader
@@ -338,6 +425,7 @@ const ChatRoomPage = ({
               usersStatus={usersStatus}
               handleOpen={handleOpen}
               id={id}
+              onBack={onBack}
             />
             <PopoverComp
               id={id}
@@ -349,16 +437,16 @@ const ChatRoomPage = ({
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: 1,
-                  p: 2,
+                  gap: 0.5,
+                  p: 1.5,
+                  minWidth: "180px",
                 }}
               >
                 {popoverActions.map((item, i) => (
                   <Button
                     key={i}
                     startIcon={item.icon}
-                    endIcon={<ChevronRight />}
+                    endIcon={<ChevronRight sx={{ ml: "auto", fontSize: "1.1rem", opacity: 0.7 }} />}
                     onClick={() => {
                       if (item.label === "Clear Chat") {
                         handleClearChat();
@@ -368,8 +456,30 @@ const ChatRoomPage = ({
                         handleClickClose();
                       }
                     }}
+                    sx={{
+                      width: "100%",
+                      justifyContent: "flex-start",
+                      px: 2,
+                      py: 1,
+                      borderRadius: "10px",
+                      color: item.label.includes("Delete") || item.label.includes("Block") || item.label.includes("Clear")
+                        ? "#dc2626"
+                        : "text.primary",
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      textTransform: "none",
+                      "&:hover": {
+                        backgroundColor: item.label.includes("Delete") || item.label.includes("Block") || item.label.includes("Clear")
+                          ? "rgba(220, 38, 38, 0.08)"
+                          : "rgba(14, 116, 144, 0.08)",
+                      },
+                      "& .MuiButton-startIcon": {
+                        color: "inherit",
+                        mr: 1.5,
+                      }
+                    }}
                   >
-                    {item.label}
+                    <span style={{ flexGrow: 1, textAlign: "left" }}>{item.label}</span>
                   </Button>
                 ))}
               </Box>
@@ -387,42 +497,113 @@ const ChatRoomPage = ({
 
             {/* typing indicator */}
             {isSomeoneTyping && (
-              <Typography px={2} py={1} color="textSecondary">
-                Typing...
-              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 3,
+                  py: 1.5,
+                  backgroundColor: "#f3f4f6",
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 0.5,
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor: "#0e7490",
+                      animation: "bounce 1.4s infinite ease-in-out both",
+                      animationDelay: "-0.32s",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor: "#0e7490",
+                      animation: "bounce 1.4s infinite ease-in-out both",
+                      animationDelay: "-0.16s",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor: "#0e7490",
+                      animation: "bounce 1.4s infinite ease-in-out both",
+                    }}
+                  />
+                </Box>
+                <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 550, letterSpacing: "0.02em" }}>
+                  {typingUserName} is typing
+                </Typography>
+                <style>{`
+                  @keyframes bounce {
+                    0%, 80%, 100% { transform: scale(0); }
+                    40% { transform: scale(1.0); }
+                  }
+                `}</style>
+              </Box>
             )}
 
-            <Box
-              sx={{
-                textAlign: "center",
-                color: "black",
-                py: 1,
-                borderRadius: 1,
-                mb: 1,
-              }}
-            >
-              {isBlocked ? (
-                isBlocked === "you" ? (
+            {isBlocked && (
+              <Box
+                sx={{
+                  mx: 2,
+                  my: 1.5,
+                  p: 2,
+                  borderRadius: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "rgba(239, 68, 68, 0.06)",
+                  border: "1px solid rgba(239, 68, 68, 0.15)",
+                  backdropFilter: "blur(8px)",
+                  textAlign: "center",
+                }}
+              >
+                {isBlocked === "you" ? (
                   <>
-                    <Typography variant="body2">
-                      You have blocked this chat. Unblock to continue messaging.
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: "#991b1b" }}>
+                      You have blocked this connection. Unblock to continue messaging.
                     </Typography>
                     <Button
                       size="small"
                       variant="contained"
-                      sx={{ mt: 1 }}
+                      color="error"
+                      sx={{
+                        mt: 1.5,
+                        textTransform: "none",
+                        borderRadius: "8px",
+                        fontWeight: 600,
+                        boxShadow: "none",
+                        "&:hover": { boxShadow: "none" },
+                      }}
                       onClick={() => blockChatMutation.mutate(chatId)}
                     >
-                      Unblock
+                      Unblock Chat
                     </Button>
                   </>
                 ) : (
-                  <Typography variant="body2">
-                    Unable to send message.
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: "#991b1b" }}>
+                    Unable to send messages. You have been blocked by this user.
                   </Typography>
-                )
-              ) : null}
-            </Box>
+                )}
+              </Box>
+            )}
 
             {/* input box */}
             <ChatInput
@@ -437,25 +618,59 @@ const ChatRoomPage = ({
           </Box>
         ) : (
           <Box
-            flex={1}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            marginLeft="20rem"
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 3,
+              background: "radial-gradient(circle at 50% 50%, #fafafa 0%, #f4f4f5 100%)",
+            }}
           >
-            <Lottie
-              animationData={emptyChat}
-              loop={true}
-              style={{ width: 200, height: 200 }}
-            />
-            <Typography
-              variant="h6"
-              color="primary"
-              sx={{ fontWeight: "bold" }}
+            <Box
+              sx={{
+                p: 4,
+                borderRadius: "24px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                background: "rgba(255, 255, 255, 0.6)",
+                border: "1px solid rgba(255, 255, 255, 0.8)",
+                backdropFilter: "blur(20px)",
+                boxShadow: "0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01)",
+                textAlign: "center",
+                maxWidth: "400px",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 25px 30px -5px rgba(0,0,0,0.08), 0 15px 15px -5px rgba(0,0,0,0.02)",
+                }
+              }}
             >
-              Select a chat to start messaging
-            </Typography>
+              <Lottie
+                animationData={emptyChat}
+                loop={true}
+                style={{ width: 180, height: 180 }}
+              />
+              <Typography
+                variant="h6"
+                color="primary"
+                sx={{
+                  fontWeight: 700,
+                  mt: 2,
+                  mb: 1,
+                  background: "linear-gradient(45deg, #0e7490 30%, #22d3ee 90%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent"
+                }}
+              >
+                Select a Chat
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ px: 2, lineHeight: 1.5 }}>
+                Pick a conversation from the list to start exchanging messages, sharing media, and making calls.
+              </Typography>
+            </Box>
           </Box>
         )}
       </Box>
@@ -465,30 +680,48 @@ const ChatRoomPage = ({
         onClose={handleClickClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            p: 1,
+            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.15)",
+          }
+        }}
       >
-        {/* {console.log("Dialog render with open:", dialogOpen)} */}
-        <DialogTitle id="alert-dialog-title">
-          {dialogType == "clear"
-            ? "Clear Chat!!"
+        <DialogTitle id="alert-dialog-title" sx={{ fontWeight: 700, pb: 1 }}>
+          {dialogType === "clear"
+            ? "Clear Chat History?"
             : isBlocked
-              ? "Unblock Chat!!"
-              : "Block Chat!!"}
+              ? "Unblock Conversation?"
+              : "Block Conversation?"}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText id="alert-dialog-description" sx={{ color: "text.secondary" }}>
             {dialogType === "clear"
-              ? "Are you sure to clear the chat?"
+              ? "Are you sure you want to clear your chat history? This action will permanently remove all messages in this conversation."
               : isBlocked === "you"
-                ? "Are you sure to unblock the chat?"
-                : "Are you sure to block the chat?"}
+                ? "Are you sure you want to unblock this conversation? You will start receiving messages and calls from this connection again."
+                : "Are you sure you want to block this conversation? You will no longer receive any messages or calls from them."}
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button size="small" variant="outlined" onClick={handleClickClose}>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button
+            size="medium"
+            variant="outlined"
+            onClick={handleClickClose}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              borderColor: "divider",
+              color: "text.secondary",
+              "&:hover": { borderColor: "text.primary" },
+            }}
+          >
             Cancel
           </Button>
           <Button
-            size="small"
+            size="medium"
             onClick={() => {
               console.log("Confirm clicked, chatId:", chatId);
               if (dialogType === "clear") {
@@ -500,6 +733,14 @@ const ChatRoomPage = ({
               handleClose();
             }}
             variant="contained"
+            color={dialogType === "clear" || !isBlocked ? "error" : "primary"}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              boxShadow: "none",
+              "&:hover": { boxShadow: "none" },
+            }}
             autoFocus
           >
             Confirm

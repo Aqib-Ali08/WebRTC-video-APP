@@ -33,6 +33,7 @@ const initialState = {
   // }
   unreadCounts: {}, // { conversationId: number }
   totalUnread: 0, // will not use this in UI
+  activeChatId: null,
 };
 
 const chatSlice = createSlice({
@@ -144,6 +145,12 @@ const chatSlice = createSlice({
       state.unreadCounts = {};
       state.totalUnread = 0;
     },
+    setActiveChatId: (state, action) => {
+      state.activeChatId = action.payload;
+    },
+    clearActiveChatId: (state) => {
+      state.activeChatId = null;
+    },
   },
 });
 
@@ -159,6 +166,8 @@ export const {
   incrementUnread,
   clearUnread,
   resetAllUnread,
+  setActiveChatId,
+  clearActiveChatId,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

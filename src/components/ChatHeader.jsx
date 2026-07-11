@@ -1,4 +1,4 @@
-import { AddIcCall, MoreVert, VideoCall } from "@mui/icons-material";
+import { AddIcCall, ArrowBack, MoreVert, VideoCall } from "@mui/icons-material";
 import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
 
 export default function ChatHeader({
@@ -6,6 +6,7 @@ export default function ChatHeader({
   usersStatus,
   id,
   handleOpen,
+  onBack,
 }) {
   return (
     <Box
@@ -19,14 +20,33 @@ export default function ChatHeader({
         justifyContent: "space-between",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
+      <Box sx={{ display: "flex", alignItems: "center", overflow: "hidden", mr: 1 }}>
+        {onBack && (
+          <IconButton
+            onClick={onBack}
+            sx={{ display: { xs: "inline-flex", md: "none" }, mr: 1 }}
+          >
+            <ArrowBack />
+          </IconButton>
+        )}
         <Avatar
           src={roomPageProps.profilePic}
           alt={roomPageProps.fullName}
-          sx={{ mr: 1, bgcolor: "#0e7490" }}
+          sx={{ mr: 1, bgcolor: "#0e7490", flexShrink: 0 }}
         />
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="h6">{roomPageProps.fullName}</Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: { xs: "120px", sm: "200px", md: "none" },
+            }}
+          >
+            {roomPageProps.fullName}
+          </Typography>
           <Typography
             variant="body2"
             color={
@@ -35,6 +55,13 @@ export default function ChatHeader({
             fontWeight={
               usersStatus?.[roomPageProps.userId]?.online ? "bold" : "normal"
             }
+            sx={{
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: { xs: "120px", sm: "200px", md: "none" },
+            }}
           >
             {usersStatus?.[roomPageProps.userId]?.online
               ? "Online"
@@ -54,7 +81,7 @@ export default function ChatHeader({
         </Box>
       </Box>
 
-      <Box>
+      <Box sx={{ display: "flex", flexShrink: 0 }}>
         <Tooltip title="Audio Call">
           <IconButton>
             <AddIcCall />

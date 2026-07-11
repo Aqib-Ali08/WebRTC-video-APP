@@ -9,7 +9,8 @@ import { showToast } from "./redux/slices/appSlice";
 import { useDispatch } from "react-redux";
 import { SocketProvider, useSocket } from "./context/socketContext";
 import MainApp from "./MainApp";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./queryClient";
 
 // const socket = io(import.meta.env.VITE_SERVER_URL || "http://localhost:3000", {
 //   auth: {
@@ -18,7 +19,6 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 // });
 
 const App = () => {
-  const queryClient = new QueryClient();
   return (
     <>
       <QueryClientProvider client={queryClient}>

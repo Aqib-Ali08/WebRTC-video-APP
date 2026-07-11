@@ -24,7 +24,6 @@ import {
   setUnreadCount,
 } from "../redux/slices/chatSlice";
 import ChatListItem from "../components/ChatListItem";
-import { registerPresenceSocketHandlers } from "../sockets/chats.socket";
 
 const ChatSectionPage = () => {
   const socket = useSocket();
@@ -64,17 +63,18 @@ const ChatSectionPage = () => {
   }, [data, dispatch]);
 
   useEffect(() => {
-    if (!socket || !data?.length) return;
+    if (!socket) return;
 
-    const receivedMessage = registerPresenceSocketHandlers(
-      socket,
-      dispatch,
-      myUserId,
-      refetch
-    );
+    const handleMessageReceive = () => {
+      refetch();
+    };
 
-    return receivedMessage;
-  }, [socket, data, dispatch, myUserId, refetch]);
+    socket.on(SocketEvents.SERVER_CHAT_RECEIVE, handleMessageReceive);
+
+    return () => {
+      socket.off(SocketEvents.SERVER_CHAT_RECEIVE, handleMessageReceive);
+    };
+  }, [socket, refetch]);
 
   useEffect(() => {
     if (!socket) return;
@@ -120,11 +120,24 @@ const ChatSectionPage = () => {
     });
   };
 
+  const handleBackToChats = () => {
+    selectedC_IdRef.current = null;
+    setRoomPageProps({});
+  };
+
+  const isChatOpen = !!selectedC_IdRef.current;
+
   return (
-    <Box display="flex" height="100%">
+    <Box display="flex" height="100%" sx={{ overflow: "hidden", width: "100%" }}>
       <Paper
         elevation={3}
-        sx={{ width: 300, p: 2, display: "flex", flexDirection: "column" }}
+        sx={{
+          width: { xs: "100%", md: 300 },
+          p: 2,
+          display: { xs: isChatOpen ? "none" : "flex", md: "flex" },
+          flexDirection: "column",
+          boxSizing: "border-box",
+        }}
       >
         <TextField
           placeholder="Search Friends"
@@ -206,6 +219,7 @@ const ChatSectionPage = () => {
         selectedC_IdRef={selectedC_IdRef}
         roomPageProps={roomPageProps}
         updateSidebarOrder={refetch}
+        onBack={handleBackToChats}
       />
     </Box>
   );
