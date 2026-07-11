@@ -25,7 +25,7 @@ export default function ChatInput({
       display="flex"
       alignItems="center"
       gap={1}
-      bgcolor="#fff"
+      bgcolor="background.paper"
       position="relative"
     >
       <TextField

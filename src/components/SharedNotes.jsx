@@ -99,7 +99,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
       minWidth: 150,
       cellRenderer: (params) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.5 }}>
-          <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "#0e7490" }}>
+          <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "primary.main" }}>
             {params.value?.[0]?.toUpperCase() || "U"}
           </Avatar>
           <span>{params.value}</span>
@@ -113,7 +113,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
       minWidth: 150,
       cellRenderer: (params) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 0.5 }}>
-          <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "#155e75" }}>
+          <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", bgcolor: "primary.dark" }}>
             {params.value?.[0]?.toUpperCase() || "U"}
           </Avatar>
           <span>{params.value}</span>
@@ -183,16 +183,16 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
           sx={{
             minHeight: 40,
             "& .MuiTabs-indicator": {
-              backgroundColor: "#0e7490",
+              backgroundColor: "primary.main",
             },
             "& .MuiTab-root": {
               textTransform: "capitalize",
               fontWeight: 700,
               fontSize: "0.95rem",
               minHeight: 40,
-              color: "#64748b",
+              color: "text.secondary",
               "&.Mui-selected": {
-                color: "#0e7490",
+                color: "primary.main",
               },
             },
           }}
@@ -207,12 +207,12 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             variant={viewMode === "grid" ? "contained" : "outlined"}
             onClick={() => setViewMode("grid")}
             sx={{
-              borderColor: "#cbd5e1",
-              backgroundColor: viewMode === "grid" ? "#0e7490" : "transparent",
-              color: viewMode === "grid" ? "#fff" : "#64748b",
+              borderColor: "divider",
+              backgroundColor: viewMode === "grid" ? "primary.main" : "transparent",
+              color: viewMode === "grid" ? "background.paper" : "text.secondary",
               "&:hover": {
-                backgroundColor: viewMode === "grid" ? "#155e75" : "#f1f5f9",
-                borderColor: "#94a3b8",
+                backgroundColor: viewMode === "grid" ? "primary.dark" : "action.hover",
+                borderColor: "action.focus",
               },
             }}
           >
@@ -222,12 +222,12 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             variant={viewMode === "table" ? "contained" : "outlined"}
             onClick={() => setViewMode("table")}
             sx={{
-              borderColor: "#cbd5e1",
-              backgroundColor: viewMode === "table" ? "#0e7490" : "transparent",
-              color: viewMode === "table" ? "#fff" : "#64748b",
+              borderColor: "divider",
+              backgroundColor: viewMode === "table" ? "primary.main" : "transparent",
+              color: viewMode === "table" ? "background.paper" : "text.secondary",
               "&:hover": {
-                backgroundColor: viewMode === "table" ? "#155e75" : "#f1f5f9",
-                borderColor: "#94a3b8",
+                backgroundColor: viewMode === "table" ? "primary.dark" : "action.hover",
+                borderColor: "action.focus",
               },
             }}
           >
@@ -243,7 +243,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             textAlign: "center",
             py: 8,
             px: 2,
-            backgroundColor: "#fff",
+            backgroundColor: "background.paper",
             borderRadius: 3,
             border: "1px dashed #cbd5e1",
           }}
@@ -296,7 +296,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
                         height: 28,
                         fontSize: "0.8rem",
                         fontWeight: 700,
-                        backgroundColor: subTab === 0 ? "#0e7490" : "#155e75",
+                        backgroundColor: subTab === 0 ? "primary.main" : "primary.dark",
                       }}
                     >
                       {subTab === 0
@@ -314,7 +314,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
                       <Typography
                         variant="body2"
                         fontWeight={600}
-                        color="#334155"
+                        color="text.primary"
                         sx={{
                           whiteSpace: "nowrap",
                           overflow: "hidden",
@@ -329,7 +329,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
                   <Typography
                     variant="h6"
                     fontWeight={700}
-                    color="#1e293b"
+                    color="text.primary"
                     sx={{
                       mb: 1,
                       lineHeight: 1.3,
@@ -351,7 +351,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       lineHeight: 1.5,
-                      color: "#475569",
+                      color: "text.secondary",
                       mb: 2,
                     }}
                   >
@@ -365,13 +365,13 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
                     sx={{
                       px: 2.5,
                       py: 1,
-                      backgroundColor: "#f8fafc",
+                      backgroundColor: "background.default",
                       display: "flex",
                       alignItems: "center",
                       gap: 1,
                     }}
                   >
-                    <CalendarMonthIcon sx={{ fontSize: 14, color: "#64748b" }} />
+                    <CalendarMonthIcon sx={{ fontSize: 14, color: "text.secondary" }} />
                     <Typography variant="caption" color="text.secondary">
                       {new Date(item.sharedAt).toLocaleString(undefined, {
                         dateStyle: "short",
@@ -393,7 +393,7 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
                       sx={{
                         textTransform: "none",
                         fontWeight: 700,
-                        color: "#0e7490",
+                        color: "primary.main",
                       }}
                     >
                       View Note
@@ -428,11 +428,11 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             borderRadius: 3,
             overflow: "hidden",
             boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-            "--ag-header-background-color": "#f8fafc",
-            "--ag-header-cell-hover-background-color": "#f1f5f9",
-            "--ag-row-hover-color": "#f8fafc",
-            "--ag-selected-row-background-color": "rgba(14, 116, 144, 0.08)",
-            "--ag-range-selection-border-color": "#0e7490",
+            "--ag-header-background-color": "background.default",
+            "--ag-header-cell-hover-background-color": "action.hover",
+            "--ag-row-hover-color": "background.default",
+            "--ag-selected-row-background-color": "action.selected",
+            "--ag-range-selection-border-color": "primary.main",
             fontFamily: "'Poppins', sans-serif",
           }}
         >
@@ -468,23 +468,23 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             pb: 1,
           }}
         >
-          <Typography variant="h5" fontWeight={800} color="#1e293b">
+          <Typography variant="h5" fontWeight={800} color="text.primary">
             {selectedRow?.title}
           </Typography>
           <Chip
             avatar={
-              <Avatar sx={{ bgcolor: "#0e7490", color: "#fff" }}>
+              <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText" }}>
                 {selectedRow?.from?.[0]?.toUpperCase() || "U"}
               </Avatar>
             }
             label={`From: ${selectedRow?.from}`}
-            sx={{ fontWeight: 700, color: "#0e7490", bgcolor: "rgba(14, 116, 144, 0.08)" }}
+            sx={{ fontWeight: 700, color: "primary.main", bgcolor: "action.selected" }}
           />
         </DialogTitle>
-        <DialogContent dividers sx={{ borderColor: "#f1f5f9" }}>
+        <DialogContent dividers sx={{ borderColor: "action.hover" }}>
           <Typography
             variant="body1"
-            color="#334155"
+            color="text.primary"
             sx={{
               whiteSpace: "pre-wrap",
               lineHeight: 1.6,
@@ -499,10 +499,10 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             onClick={handleViewNoteClose}
             variant="contained"
             sx={{
-              backgroundColor: "#0e7490",
+              backgroundColor: "primary.main",
               textTransform: "none",
               fontWeight: 700,
-              "&:hover": { backgroundColor: "#155e75" },
+              "&:hover": { backgroundColor: "primary.dark" },
             }}
           >
             Close
@@ -519,12 +519,12 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
         }}
       >
         <DialogTitle sx={{ pb: 1 }}>
-          <Typography variant="h6" fontWeight={800} color="#1e293b">
+          <Typography variant="h6" fontWeight={800} color="text.primary">
             Unsend Shared Note
           </Typography>
         </DialogTitle>
         <DialogContent>
-          <DialogContentText color="#475569">
+          <DialogContentText color="text.secondary">
             Are you sure you want to unshare <strong>"{selectedRow?.title}"</strong> with <strong>{selectedRow?.to}</strong>?
             This will remove their access to the note.
           </DialogContentText>
@@ -537,9 +537,9 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             sx={{
               textTransform: "none",
               fontWeight: 700,
-              borderColor: "#cbd5e1",
-              color: "#475569",
-              "&:hover": { borderColor: "#94a3b8" },
+              borderColor: "divider",
+              color: "text.secondary",
+              "&:hover": { borderColor: "action.focus" },
             }}
           >
             Cancel
@@ -552,8 +552,8 @@ export default function SharedNotes({ sharedNotes, onRefresh }) {
             sx={{
               textTransform: "none",
               fontWeight: 700,
-              backgroundColor: "#ef4444",
-              "&:hover": { backgroundColor: "#dc2626" },
+              backgroundColor: "error.main",
+              "&:hover": { backgroundColor: "error.dark" },
             }}
           >
             {unsharingLoading ? "Unsending..." : "Confirm"}

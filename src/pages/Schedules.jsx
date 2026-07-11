@@ -67,7 +67,7 @@ export default function Schedules() {
         width: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#f8fafc",
+        backgroundColor: "background.default",
         overflowY: "auto",
         boxSizing: "border-box"
       }}
@@ -84,9 +84,9 @@ export default function Schedules() {
             p: 3,
             mb: 3,
             borderRadius: 3,
-            background: "linear-gradient(135deg, #0e7490 0%, #155e75 100%)",
+            background: "linear-gradient(135deg, #4f46e5 0%, #075985 100%)",
             color: "white",
-            boxShadow: "0 10px 25px -5px rgba(14, 116, 144, 0.3)"
+            boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.3)"
           }}
         >
           <Grid container spacing={3} alignItems="center">
@@ -167,7 +167,7 @@ export default function Schedules() {
             textColor="inherit"
             sx={{
               "& .MuiTabs-indicator": {
-                backgroundColor: "#0e7490",
+                backgroundColor: "primary.main",
                 height: 3,
                 borderRadius: "3px 3px 0 0"
               },
@@ -175,12 +175,12 @@ export default function Schedules() {
                 textTransform: "none",
                 fontWeight: 700,
                 fontSize: "1.05rem",
-                color: "#64748b",
+                color: "text.secondary",
                 px: 3,
                 minHeight: 48,
                 transition: "color 0.2s",
                 "&.Mui-selected": {
-                  color: "#0e7490"
+                  color: "primary.main"
                 }
               }
             }}

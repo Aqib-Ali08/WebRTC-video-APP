@@ -106,7 +106,7 @@ const ConnectionCard = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor: "#fff",
+        backgroundColor: "background.paper",
         transition: "transform 0.2s",
         "&:hover": {
           transform: "translateY(-2px)",
@@ -121,7 +121,7 @@ const ConnectionCard = ({
             width: 40,
             height: 40,
             // bgcolor: "#d1d9ff"
-            bgcolor: "#0e7490",
+            bgcolor: "primary.main",
           }}
         />
         <Typography sx={{ fontSize: "16px" }} fontWeight={600}>
@@ -145,7 +145,7 @@ const actionBtnStyles = (variant) => ({
 
   ...(variant === "outlined" && {
     // background: "linear-gradient(to right, #6a5af9, #8e73ff)",
-    color: "#0e7490",
+    color: "primary.main",
     "&:hover": {
       // background: "linear-gradient(to right, #5b4de1, #7d64e6)",
     },
@@ -164,12 +164,12 @@ const actionBtnStyles = (variant) => ({
   // }),
   ...(variant === "error" ||
     (variant === "secondary" && {
-      backgroundColor: "#ff5252",
-      color: "white",
-      borderColor: "#ff5252",
+      backgroundColor: "error.main",
+      color: "background.paper",
+      borderColor: "error.main",
       "&:hover": {
-        backgroundColor: "#e64949",
-        borderColor: "#e64949",
+        backgroundColor: "error.dark",
+        borderColor: "error.dark",
       },
     })),
 });

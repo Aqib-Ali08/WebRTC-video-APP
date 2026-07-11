@@ -4,9 +4,9 @@ import { Box } from "@mui/material";
 
 const DashboardLayout = () => {
   return (
-    <Box display="flex" sx={{ overflow: "hidden" }}>
+    <Box display="flex" sx={{ overflow: "hidden", bgcolor: "background.default", minHeight: "100vh" }}>
       <Sidebar />
-      <Box flex={1} height={"100vh"}>
+      <Box flex={1} height={"100vh"} sx={{ bgcolor: "background.default" }}>
         <Outlet />
       </Box>
     </Box>

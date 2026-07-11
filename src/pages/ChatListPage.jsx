@@ -63,7 +63,7 @@ const ChatListPage = () => {
           ].map((name) => (
             <ListItem key={name} button>
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: "#0e7490" }} />
+                <Avatar sx={{ bgcolor: "primary.main" }} />
               </ListItemAvatar>
               <ListItemText
                 primary={<Typography variant="body1">{name}</Typography>}
@@ -110,7 +110,7 @@ const ChatListPage = () => {
                 alignItems: "center",
               }}
             >
-              <Avatar src="/avatar.jpg" sx={{ mr: 1, bgcolor: "#0e7490" }} />
+              <Avatar src="/avatar.jpg" sx={{ mr: 1, bgcolor: "primary.main" }} />
               <Typography variant="h6">
                 Elizabeth Olsen{" "}
                 {/* <span style={{ color: "green", fontSize: 12 }}>●</span> */}
@@ -151,7 +151,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "white", color: "black", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "background.paper", color: "text.primary", borderRadius: 2 }}
             >
               <Typography variant="body2" align="left">
                 That’s Great
@@ -165,7 +165,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "#0e7490", color: "white", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "primary.main", color: "white", borderRadius: 2 }}
             >
               <Typography variant="body2">
                 I am refer to the project structure and found some mistakes
@@ -180,7 +180,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "#0e7490", color: "white", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "primary.main", color: "white", borderRadius: 2 }}
             >
               <Typography variant="body2">
                 There are some bugs in this project
@@ -194,7 +194,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "white", color: "black", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "background.paper", color: "text.primary", borderRadius: 2 }}
             >
               <Typography variant="body2" align="left">
                 I see that project
@@ -208,7 +208,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "white", color: "black", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "background.paper", color: "text.primary", borderRadius: 2 }}
             >
               <Typography variant="body2" align="left">
                 Yes there are many bugs in that project
@@ -223,7 +223,7 @@ const ChatListPage = () => {
             >
               <Typography
                 variant="body2"
-                sx={{ color: "#fff", display: "flex", alignItems: "center" }}
+                sx={{ color: "white", display: "flex", alignItems: "center" }}
               >
                 PDF <Icon icon="mdi:chevron-down" style={{ marginLeft: 4 }} />
               </Typography>
@@ -232,7 +232,7 @@ const ChatListPage = () => {
 
           <Box alignSelf="flex-end">
             <Paper
-              sx={{ p: 1, bgcolor: "#0e7490", color: "white", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "primary.main", color: "white", borderRadius: 2 }}
             >
               <Typography variant="body2">
                 Can you send me the report

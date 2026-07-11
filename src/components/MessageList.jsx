@@ -70,7 +70,7 @@ export default function MessageList({
       flexDirection="column"
       gap={2.5}
       overflow="auto"
-      bgcolor="#f5f5f5"
+      bgcolor="background.default"
       onScroll={handleScroll}
       position="relative"
     >
@@ -88,7 +88,7 @@ export default function MessageList({
                   width="30%"
                   height={40}
                   sx={{
-                    bgcolor: alignLeft ? "#e0e0e0" : "#b2ebf2",
+                    bgcolor: alignLeft ? "action.selected" : "action.hover",
                   }}
                 />
               </Box>

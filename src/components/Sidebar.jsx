@@ -123,21 +123,20 @@ const Sidebar = () => {
       style={{
         width: "80px",
         height: "100vh",
-        // height: "auto",
-        background: "#f9fafb",
-        boxShadow: "2px 0 6px rgba(0,0,0,0.05)",
+        background: "#0c1322",
+        boxShadow: "2px 0 10px rgba(0, 0, 0, 0.3)",
         padding: "1rem 0",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         overflowY: "auto",
+        borderRight: "1px solid rgba(255, 255, 255, 0.05)"
       }}
     >
       <Tooltip title={fullName}>
         <Avatar
           sx={{
-            // backgroundColor: "#667eea",
-            backgroundColor: "#0e7490",
+            backgroundColor: "primary.main",
             cursor: "pointer",
           }}
           onClick={handleClickOpen}
@@ -195,8 +194,7 @@ const Sidebar = () => {
             gap: "1rem",
           },
           ".MuiTabs-indicator": {
-            // backgroundColor: "#667eea",
-            backgroundColor: "#0e7490",
+            backgroundColor: "primary.main",
             width: "4px",
           },
         }}
@@ -209,8 +207,13 @@ const Sidebar = () => {
                 minWidth: "auto",
                 padding: "8px",
                 borderRadius: "10px",
+                color: "text.secondary",
+                "&.Mui-selected": {
+                  color: "primary.main",
+                },
                 "&:hover": {
-                  backgroundColor: "rgba(102, 126, 234, 0.1)",
+                  backgroundColor: "rgba(129, 140, 248, 0.1)",
+                  color: "primary.light",
                 },
               }}
             />

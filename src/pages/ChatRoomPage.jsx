@@ -416,7 +416,7 @@ const ChatRoomPage = ({
               borderColor: "divider",
               height: "100vh",
               width: "100%",
-              bgcolor: "#f9fafb",
+              bgcolor: "background.default",
             }}
           >
             {/* Header */}
@@ -504,7 +504,7 @@ const ChatRoomPage = ({
                   gap: 1,
                   px: 3,
                   py: 1.5,
-                  backgroundColor: "#f3f4f6",
+                  backgroundColor: "background.paper",
                   borderTop: "1px solid",
                   borderColor: "divider",
                 }}
@@ -521,7 +521,7 @@ const ChatRoomPage = ({
                       width: 6,
                       height: 6,
                       borderRadius: "50%",
-                      backgroundColor: "#0e7490",
+                      backgroundColor: "primary.main",
                       animation: "bounce 1.4s infinite ease-in-out both",
                       animationDelay: "-0.32s",
                     }}
@@ -531,7 +531,7 @@ const ChatRoomPage = ({
                       width: 6,
                       height: 6,
                       borderRadius: "50%",
-                      backgroundColor: "#0e7490",
+                      backgroundColor: "primary.main",
                       animation: "bounce 1.4s infinite ease-in-out both",
                       animationDelay: "-0.16s",
                     }}
@@ -541,7 +541,7 @@ const ChatRoomPage = ({
                       width: 6,
                       height: 6,
                       borderRadius: "50%",
-                      backgroundColor: "#0e7490",
+                      backgroundColor: "primary.main",
                       animation: "bounce 1.4s infinite ease-in-out both",
                     }}
                   />
@@ -577,7 +577,7 @@ const ChatRoomPage = ({
               >
                 {isBlocked === "you" ? (
                   <>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: "#991b1b" }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: "#ef4444" }}>
                       You have blocked this connection. Unblock to continue messaging.
                     </Typography>
                     <Button
@@ -598,7 +598,7 @@ const ChatRoomPage = ({
                     </Button>
                   </>
                 ) : (
-                  <Typography variant="body2" sx={{ fontWeight: 500, color: "#991b1b" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: "#ef4444" }}>
                     Unable to send messages. You have been blocked by this user.
                   </Typography>
                 )}
@@ -625,7 +625,7 @@ const ChatRoomPage = ({
               alignItems: "center",
               justifyContent: "center",
               p: 3,
-              background: "radial-gradient(circle at 50% 50%, #fafafa 0%, #f4f4f5 100%)",
+              background: "radial-gradient(circle at 50% 50%, #151d30 0%, #0b0f19 100%)",
             }}
           >
             <Box
@@ -635,16 +635,16 @@ const ChatRoomPage = ({
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                background: "rgba(255, 255, 255, 0.6)",
-                border: "1px solid rgba(255, 255, 255, 0.8)",
+                background: "rgba(21, 30, 51, 0.4)",
+                border: "1px solid rgba(255, 255, 255, 0.05)",
                 backdropFilter: "blur(20px)",
-                boxShadow: "0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01)",
+                boxShadow: "0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.2)",
                 textAlign: "center",
                 maxWidth: "400px",
                 transition: "all 0.3s ease",
                 "&:hover": {
                   transform: "translateY(-4px)",
-                  boxShadow: "0 25px 30px -5px rgba(0,0,0,0.08), 0 15px 15px -5px rgba(0,0,0,0.02)",
+                  boxShadow: "0 25px 30px -5px rgba(0,0,0,0.4), 0 15px 15px -5px rgba(0,0,0,0.3)",
                 }
               }}
             >
@@ -660,7 +660,7 @@ const ChatRoomPage = ({
                   fontWeight: 700,
                   mt: 2,
                   mb: 1,
-                  background: "linear-gradient(45deg, #0e7490 30%, #22d3ee 90%)",
+                  background: "linear-gradient(45deg, #818cf8 30%, #22d3ee 90%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent"
                 }}

@@ -32,7 +32,7 @@ export default function ChatHeader({
         <Avatar
           src={roomPageProps.profilePic}
           alt={roomPageProps.fullName}
-          sx={{ mr: 1, bgcolor: "#0e7490", flexShrink: 0 }}
+          sx={{ mr: 1, bgcolor: "primary.main", flexShrink: 0 }}
         />
         <Box sx={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <Typography

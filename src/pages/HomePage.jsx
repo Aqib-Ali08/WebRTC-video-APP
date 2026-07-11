@@ -167,7 +167,7 @@ const HomePage = () => {
       sx={{
         height: "100vh",
         overflowY: "auto",
-        backgroundColor: "#f8fafc",
+        backgroundColor: "background.default",
       }}
     >
       <Box
@@ -181,7 +181,7 @@ const HomePage = () => {
         <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: "-0.5px" }}>
           <span
             style={{
-              background: "linear-gradient(90deg, #0e7490, #06b6d4)",
+              background: "linear-gradient(90deg, #818cf8, #22d3ee)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -195,7 +195,7 @@ const HomePage = () => {
         <Tooltip title="Notifications">
           <IconButton onClick={handleBellClick}>
             <Badge badgeContent={unreadCount} color="error" max={99}>
-              <Notifications sx={{ color: "#0e7490", fontSize: 28 }} />
+              <Notifications sx={{ color: "primary.main", fontSize: 28 }} />
             </Badge>
           </IconButton>
         </Tooltip>
@@ -234,7 +234,7 @@ const HomePage = () => {
               alignItems: "center",
             }}
           >
-            <Typography variant="h6" fontWeight={700} color="#1e293b">
+            <Typography variant="h6" fontWeight={700} color="text.primary">
               Notifications
             </Typography>
             {unreadCount > 0 && (
@@ -245,8 +245,8 @@ const HomePage = () => {
                 sx={{
                   textTransform: "none",
                   fontWeight: 700,
-                  color: "#0e7490",
-                  "&:hover": { bgcolor: "rgba(14, 116, 144, 0.05)" },
+                  color: "primary.main",
+                  "&:hover": { bgcolor: "rgba(129, 140, 248, 0.08)" },
                 }}
               >
                 Mark all read
@@ -272,11 +272,11 @@ const HomePage = () => {
                     sx={{
                       p: 2,
                       alignItems: "flex-start",
-                      backgroundColor: item.isRead ? "transparent" : "rgba(14, 116, 144, 0.03)",
-                      borderBottom: "1px solid #f1f5f9",
+                      backgroundColor: item.isRead ? "transparent" : "rgba(129, 140, 248, 0.05)",
+                      borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
                       transition: "background-color 0.2s",
                       "&:hover": {
-                        backgroundColor: "rgba(0,0,0,0.02)",
+                        backgroundColor: "rgba(255, 255, 255, 0.02)",
                       },
                     }}
                   >
@@ -284,7 +284,7 @@ const HomePage = () => {
                       <Avatar
                         src={item.senderId?.profilePic}
                         sx={{
-                          backgroundColor: "#0e7490",
+                          backgroundColor: "primary.main",
                           fontWeight: 700,
                           fontSize: "0.85rem",
                           width: 36,
@@ -300,18 +300,18 @@ const HomePage = () => {
                       primaryTypographyProps={{
                         fontWeight: item.isRead ? 500 : 700,
                         fontSize: "0.88rem",
-                        color: "#334155",
+                        color: "text.primary",
                         mb: 0.5,
                       }}
                       secondaryTypographyProps={{
                         fontSize: "0.75rem",
-                        color: "#94a3b8",
+                        color: "text.secondary",
                       }}
                     />
                     {!item.isRead && (
                       <CircleIcon
                         sx={{
-                          color: "#0e7490",
+                          color: "primary.main",
                           fontSize: 10,
                           mt: 1.5,
                           ml: 1,
@@ -336,11 +336,11 @@ const HomePage = () => {
           startIcon={<AddCircleOutline />}
           onClick={() => navigate("/dashboard/meetings")}
           sx={{
-            backgroundColor: "#0e7490",
+            backgroundColor: "primary.main",
             borderRadius: 2.5,
             textTransform: "none",
             fontWeight: 700,
-            "&:hover": { backgroundColor: "#155e75" },
+            "&:hover": { backgroundColor: "primary.dark" },
           }}
         >
           Create Meeting
@@ -350,11 +350,11 @@ const HomePage = () => {
           startIcon={<MarkUnreadChatAlt />}
           onClick={() => navigate("/dashboard/messages")}
           sx={{
-            backgroundColor: "#0e7490",
+            backgroundColor: "primary.main",
             borderRadius: 2.5,
             textTransform: "none",
             fontWeight: 700,
-            "&:hover": { backgroundColor: "#155e75" },
+            "&:hover": { backgroundColor: "primary.dark" },
           }}
         >
           New Chat
@@ -364,11 +364,11 @@ const HomePage = () => {
           startIcon={<PersonAddAlt1 />}
           onClick={() => navigate("/dashboard/connections")}
           sx={{
-            backgroundColor: "#0e7490",
+            backgroundColor: "primary.main",
             borderRadius: 2.5,
             textTransform: "none",
             fontWeight: 700,
-            "&:hover": { backgroundColor: "#155e75" },
+            "&:hover": { backgroundColor: "primary.dark" },
           }}
         >
           Add New Connections
@@ -440,13 +440,13 @@ const HomePage = () => {
               size="small"
               onClick={() => navigate("/dashboard/meetings")}
               sx={{
-                borderColor: "#0e7490",
-                color: "#0e7490",
+                borderColor: "primary.main",
+                color: "primary.main",
                 fontWeight: 700,
                 textTransform: "none",
                 borderRadius: 2,
                 "&:hover": {
-                  backgroundColor: "#0e7490",
+                  backgroundColor: "primary.main",
                   color: "white",
                 },
                 marginTop: "2.5rem",
@@ -480,13 +480,13 @@ const HomePage = () => {
                   size="small"
                   onClick={() => navigate("/dashboard/schedule")}
                   sx={{
-                    borderColor: "#0e7490",
-                    color: "#0e7490",
+                    borderColor: "primary.main",
+                    color: "primary.main",
                     fontWeight: 700,
                     textTransform: "none",
                     borderRadius: 2,
                     "&:hover": {
-                      backgroundColor: "#0e7490",
+                      backgroundColor: "primary.main",
                       color: "white",
                       "& .MuiSvgIcon-root": { color: "white" },
                     },
@@ -515,7 +515,7 @@ const HomePage = () => {
               {recentChats.map((chat, index) => (
                 <ListItem key={index} sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar sx={{ backgroundColor: "#0e7490" }}>
+                    <Avatar sx={{ backgroundColor: "primary.main" }}>
                       {chat.avatar}
                     </Avatar>
                   </ListItemAvatar>
@@ -530,13 +530,13 @@ const HomePage = () => {
               size="small"
               onClick={() => navigate("/dashboard/messages")}
               sx={{
-                borderColor: "#0e7490",
-                color: "#0e7490",
+                borderColor: "primary.main",
+                color: "primary.main",
                 fontWeight: 700,
                 textTransform: "none",
                 borderRadius: 2,
                 "&:hover": {
-                  backgroundColor: "#0e7490",
+                  backgroundColor: "primary.main",
                   color: "white",
                 },
                 marginTop: "1rem",

@@ -9,7 +9,7 @@ export default function ChatProfilePanel() {
       <Box display="flex" flexDirection="column" alignItems="center">
         <Avatar
           src="/elizabeth.jpg"
-          sx={{ width: 80, height: 80, mb: 1, bgcolor: "#0e7490" }}
+          sx={{ width: 80, height: 80, mb: 1, bgcolor: "primary.main" }}
         />
         <Typography variant="h6">Elizabeth Olsen</Typography>
       </Box>

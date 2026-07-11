@@ -38,7 +38,7 @@ function TabPanel({ children, value, index }) {
           p: 3,
           mt: 2,
           borderRadius: 2,
-          backgroundColor: "#fff",
+          backgroundColor: "background.paper",
           flexGrow: 1,
           overflowY: "auto",
           // maxHeight: "100vh", // causing problem of cutting the internal section due to fixed height
@@ -175,10 +175,10 @@ export default function Connections() {
               size="small"
               fullWidth
               sx={{
-                backgroundColor: "#fff",
+                backgroundColor: "background.paper",
                 borderRadius: 3,
                 mb: 2,
-                boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
+                boxShadow: "0 1px 6px rgba(0,0,0,0.2)",
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 3,
                 },

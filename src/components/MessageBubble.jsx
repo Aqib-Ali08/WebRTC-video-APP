@@ -114,9 +114,9 @@ export default function MessageBubble({
             py: 1,
             maxWidth: "65%",
             borderRadius: 1,
-            bgcolor: isMine ? "#0e7490" : "#ffffff",
-            color: isMine ? "white" : "black",
-            boxShadow: 1,
+            bgcolor: isMine ? "primary.main" : "background.paper",
+            color: isMine ? "background.paper" : "text.primary",
+            boxShadow: 2,
             position: "relative",
           }}
         >
@@ -130,7 +130,7 @@ export default function MessageBubble({
               lineHeight: 1.4,
               pr: 10, // extra space for timestamp + tick
               fontStyle: isDeleted ? "italic" : "normal",
-              color: isDeleted ? "gray" : isMine ? "white" : "black",
+              color: isDeleted ? "text.secondary" : isMine ? "background.paper" : "text.primary",
             }}
           >
             {isDeleted ? "This message was deleted" : msg.content}
@@ -151,7 +151,7 @@ export default function MessageBubble({
               variant="caption"
               sx={{
                 fontSize: "0.7rem",
-                color: isMine ? "rgba(255,255,255,0.7)" : "gray",
+                color: isMine ? "rgba(255,255,255,0.7)" : "text.secondary",
               }}
             >
               {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -173,7 +173,7 @@ export default function MessageBubble({
                 <Done
                   fontSize="small"
                   sx={{
-                    color: isMine ? "rgba(255,255,255,0.7)" : "gray",
+                    color: isMine ? "rgba(255,255,255,0.7)" : "text.secondary",
                     fontSize: "1rem",
                   }}
                 />
@@ -188,8 +188,8 @@ export default function MessageBubble({
               position: "absolute",
               bottom: -18,
               left: -10,
-              bgcolor: "white",
-              "&:hover": { bgcolor: "#eee" },
+              bgcolor: "background.paper",
+              "&:hover": { bgcolor: "divider" },
               border: "1px solid #0e7490",
             }}
             onClick={() => setShowReactionPicker((prev) => !prev)}
@@ -220,7 +220,7 @@ export default function MessageBubble({
                 px={0.5}
                 py={0.2}
                 borderRadius={1}
-                bgcolor="rgba(0,0,0,0.1)"
+                bgcolor="action.selected"
               >
                 {reaction.emoji}
               </Box>

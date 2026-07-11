@@ -87,7 +87,7 @@ const RegisterPage = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#f9fafb",
+            backgroundColor: "background.default",
           }}
         >
           {/* <img

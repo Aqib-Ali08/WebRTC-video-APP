@@ -253,7 +253,7 @@ const LoginPage = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#eee",
+            backgroundColor: "divider",
           }}
         >
           <Lottie animationData={login} loop={true} />

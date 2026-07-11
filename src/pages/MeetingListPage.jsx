@@ -58,7 +58,7 @@ const MeetingCard = ({ title, time, members, pending, highlight }) => (
       variant={highlight ? "contained" : "outlined"}
       size="small"
       fullWidth
-      sx={{ mt: 2, "&:hover": { backgroundColor: "#0e7490", color: "white" } }}
+      sx={{ mt: 2, "&:hover": { backgroundColor: "primary.main", color: "background.paper" } }}
     >
       View Details
     </Button>
@@ -70,7 +70,7 @@ const MeetingListPage = () => {
     <Box
       display="flex"
       // minHeight="100%"
-      bgcolor="#f3f5ff"
+      bgcolor="action.hover"
       sx={{
         height: "100vh",
         overflowY: "auto",
@@ -108,7 +108,7 @@ const MeetingListPage = () => {
             <Box
               key={idx}
               p={2}
-              bgcolor="white"
+              bgcolor="background.paper"
               borderRadius={1}
               display="flex"
               alignItems="center"
@@ -195,7 +195,7 @@ const MeetingListPage = () => {
       </Box>
 
       {/* Right Sidebar */}
-      <Box width="260px" p={2} bgcolor="white" borderLeft="1px solid #eee">
+      <Box width="260px" p={2} bgcolor="background.paper" borderLeft="1px solid #eee">
         <Typography fontWeight="600">Date</Typography>
         <Box display="flex" alignItems="center" gap={1} mt={1}>
           <CalendarMonthIcon />
@@ -212,7 +212,7 @@ const MeetingListPage = () => {
               text: "You have closed the logo design in final.",
               color: "#e8f5e9",
             },
-            { text: "Successfully completion of project.", color: "#fff3e0" },
+            { text: "Successfully completion of project.", color: "warning.light" },
           ].map((reminder, idx) => (
             <Box
               key={idx}

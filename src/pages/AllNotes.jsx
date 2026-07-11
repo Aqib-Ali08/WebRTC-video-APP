@@ -227,9 +227,9 @@ export default function AllNotes({ notes, onRefresh }) {
           size="small"
           sx={{
             minWidth: { xs: "100%", md: 350 },
-            backgroundColor: "#fff",
+            backgroundColor: "background.paper",
             borderRadius: 2.5,
-            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
             "& .MuiOutlinedInput-root": {
               borderRadius: 2.5,
             },
@@ -237,7 +237,7 @@ export default function AllNotes({ notes, onRefresh }) {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: "#64748b" }} />
+                <SearchIcon sx={{ color: "text.secondary" }} />
               </InputAdornment>
             ),
             endAdornment: searchQuery && (
@@ -256,16 +256,16 @@ export default function AllNotes({ notes, onRefresh }) {
           variant="contained"
           onClick={handleCreateClick}
           sx={{
-            backgroundColor: "#0e7490",
+            backgroundColor: "primary.main",
             textTransform: "none",
             fontWeight: 700,
             py: 1,
             px: 2.5,
             borderRadius: 2.5,
             "&:hover": {
-              backgroundColor: "#155e75",
+              backgroundColor: "primary.dark",
             },
-            boxShadow: "0 4px 12px rgba(14, 116, 144, 0.2)",
+            boxShadow: "0 4px 12px rgba(129, 140, 248, 0.2)",
           }}
         >
           Create Note
@@ -282,7 +282,7 @@ export default function AllNotes({ notes, onRefresh }) {
           pb: 1,
           "&::-webkit-scrollbar": { height: 6 },
           "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "rgba(0,0,0,0.1)",
+            backgroundColor: "rgba(255,255,255,0.1)",
             borderRadius: 10,
           },
         }}
@@ -297,16 +297,16 @@ export default function AllNotes({ notes, onRefresh }) {
               sx={{
                 fontSize: "0.9rem",
                 fontWeight: isActive ? 700 : 500,
-                color: isActive ? "#fff" : "#475569",
-                backgroundColor: isActive ? "#0e7490" : "#fff",
-                border: isActive ? "none" : "1px solid #e2e8f0",
+                color: isActive ? "#fff" : "text.secondary",
+                backgroundColor: isActive ? "primary.main" : "background.paper",
+                border: isActive ? "none" : "1px solid rgba(255, 255, 255, 0.05)",
                 px: 1.5,
                 py: 2,
                 cursor: "pointer",
                 borderRadius: 2,
                 transition: "all 0.2s",
                 "&:hover": {
-                  backgroundColor: isActive ? "#155e75" : "#f1f5f9",
+                  backgroundColor: isActive ? "primary.dark" : "rgba(255, 255, 255, 0.05)",
                   transform: "translateY(-1px)",
                 },
               }}
@@ -322,9 +322,9 @@ export default function AllNotes({ notes, onRefresh }) {
             textAlign: "center",
             py: 8,
             px: 2,
-            backgroundColor: "#fff",
+            backgroundColor: "background.paper",
             borderRadius: 3,
-            border: "1px dashed #cbd5e1",
+            border: "1px dashed rgba(255, 255, 255, 0.15)",
           }}
         >
           <Typography variant="h6" color="text.secondary" fontWeight={600} mb={1}>
@@ -355,10 +355,11 @@ export default function AllNotes({ notes, onRefresh }) {
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "space-between",
-                      backgroundColor: note.color || "#ffffff",
+                      backgroundColor: "background.paper",
                       borderRadius: 3,
-                      border: "1px solid #e2e8f0",
-                      boxShadow: "0 4px 6px -1px rgba(0,0,0,0.02)",
+                      border: "1px solid rgba(255, 255, 255, 0.05)",
+                      borderLeft: `6px solid ${note.color || "#818cf8"}`,
+                      boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
                     }}
                   >
                     <CardContent sx={{ p: 2.5, pb: 1, overflow: "hidden" }}>
@@ -374,8 +375,8 @@ export default function AllNotes({ notes, onRefresh }) {
                           label={note.category || "Work"}
                           size="small"
                           sx={{
-                            backgroundColor: "rgba(14, 116, 144, 0.08)",
-                            color: "#0e7490",
+                            backgroundColor: "rgba(129, 140, 248, 0.1)",
+                            color: "primary.main",
                             fontWeight: 700,
                             fontSize: "0.75rem",
                             borderRadius: 1.5,
@@ -394,7 +395,7 @@ export default function AllNotes({ notes, onRefresh }) {
                         fontWeight={700}
                         sx={{
                           lineHeight: 1.3,
-                          color: "#1e293b",
+                          color: "text.primary",
                           mb: 0.5,
                           whiteSpace: "nowrap",
                           overflow: "hidden",
@@ -407,7 +408,7 @@ export default function AllNotes({ notes, onRefresh }) {
                       <Typography
                         variant="subtitle2"
                         sx={{
-                          color: "#64748b",
+                          color: "text.secondary",
                           mb: 1.5,
                           fontWeight: 500,
                           whiteSpace: "nowrap",
@@ -428,7 +429,7 @@ export default function AllNotes({ notes, onRefresh }) {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           lineHeight: 1.5,
-                          color: "#475569",
+                          color: "text.secondary",
                         }}
                       >
                         {note.description}
@@ -440,14 +441,14 @@ export default function AllNotes({ notes, onRefresh }) {
                         p: 1.5,
                         pt: 0,
                         justifyContent: "flex-end",
-                        borderTop: "1px solid rgba(0,0,0,0.03)",
+                        borderTop: "1px solid rgba(255,255,255,0.03)",
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Tooltip title="Edit Note">
                         <IconButton
                           size="small"
-                          sx={{ color: "#475569" }}
+                          sx={{ color: "text.secondary" }}
                           onClick={() => handleEditClick(note)}
                         >
                           <EditNoteIcon fontSize="small" />
@@ -467,7 +468,7 @@ export default function AllNotes({ notes, onRefresh }) {
                       <Tooltip title="Share with Friends">
                         <IconButton
                           size="small"
-                          sx={{ color: "#0e7490" }}
+                          sx={{ color: "primary.main" }}
                           onClick={() => handleShareClick(note)}
                         >
                           <ShareIcon fontSize="small" />
@@ -505,22 +506,22 @@ export default function AllNotes({ notes, onRefresh }) {
                 pb: 1,
               }}
             >
-              <Typography variant="h5" fontWeight={800} color="#1e293b">
+              <Typography variant="h5" fontWeight={800} color="text.primary">
                 {selectedNote.title}
               </Typography>
               <Chip
                 label={selectedNote.category}
                 sx={{
-                  backgroundColor: "rgba(14, 116, 144, 0.08)",
-                  color: "#0e7490",
+                  backgroundColor: "rgba(129, 140, 248, 0.15)",
+                  color: "primary.main",
                   fontWeight: 700,
                 }}
               />
             </DialogTitle>
-            <DialogContent dividers sx={{ borderColor: "#f1f5f9" }}>
+            <DialogContent dividers sx={{ borderColor: "rgba(255, 255, 255, 0.08)" }}>
               <Typography
                 variant="subtitle1"
-                color="#64748b"
+                color="text.secondary"
                 fontWeight={600}
                 gutterBottom
               >
@@ -528,7 +529,7 @@ export default function AllNotes({ notes, onRefresh }) {
               </Typography>
               <Typography
                 variant="body1"
-                color="#334155"
+                color="text.primary"
                 sx={{
                   whiteSpace: "pre-wrap",
                   lineHeight: 1.6,
@@ -543,10 +544,10 @@ export default function AllNotes({ notes, onRefresh }) {
                 onClick={handleClose}
                 variant="contained"
                 sx={{
-                  backgroundColor: "#0e7490",
+                  backgroundColor: "primary.main",
                   textTransform: "none",
                   fontWeight: 700,
-                  "&:hover": { backgroundColor: "#155e75" },
+                  "&:hover": { backgroundColor: "primary.dark" },
                 }}
               >
                 Close
@@ -558,11 +559,11 @@ export default function AllNotes({ notes, onRefresh }) {
         {(mode === "create" || mode === "edit") && (
           <>
             <DialogTitle sx={{ pb: 1 }}>
-              <Typography variant="h5" fontWeight={800} color="#1e293b">
+              <Typography variant="h5" fontWeight={800} color="text.primary">
                 {mode === "create" ? "Create Note" : "Edit Note"}
               </Typography>
             </DialogTitle>
-            <DialogContent dividers sx={{ borderColor: "#f1f5f9" }}>
+            <DialogContent dividers sx={{ borderColor: "rgba(255, 255, 255, 0.08)" }}>
               <TextField
                 margin="dense"
                 label="Note Title"
@@ -589,7 +590,7 @@ export default function AllNotes({ notes, onRefresh }) {
               <Typography
                 variant="subtitle2"
                 fontWeight={700}
-                color="#475569"
+                color="text.secondary"
                 sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}
               >
                 <LabelIcon sx={{ fontSize: 16 }} /> Category
@@ -605,10 +606,10 @@ export default function AllNotes({ notes, onRefresh }) {
                       sx={{
                         cursor: "pointer",
                         fontWeight: 600,
-                        backgroundColor: isSel ? "#0e7490" : "#f1f5f9",
-                        color: isSel ? "#fff" : "#475569",
+                        backgroundColor: isSel ? "primary.main" : "rgba(255, 255, 255, 0.05)",
+                        color: isSel ? "#fff" : "text.secondary",
                         "&:hover": {
-                          backgroundColor: isSel ? "#155e75" : "#e2e8f0",
+                          backgroundColor: isSel ? "primary.dark" : "rgba(255, 255, 255, 0.1)",
                         },
                       }}
                     />
@@ -617,7 +618,7 @@ export default function AllNotes({ notes, onRefresh }) {
               </Box>
 
               {/* Color Selector */}
-              <Typography variant="subtitle2" fontWeight={700} color="#475569" sx={{ mb: 1 }}>
+              <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ mb: 1 }}>
                 Choose Note Color
               </Typography>
               <Box sx={{ display: "flex", gap: 1.5, mb: 3 }}>
@@ -632,7 +633,8 @@ export default function AllNotes({ notes, onRefresh }) {
                           height: 32,
                           borderRadius: "50%",
                           backgroundColor: col.value,
-                          border: isSel ? "2px solid #0e7490" : "1px solid #cbd5e1",
+                          border: isSel ? "2px solid" : "1px solid rgba(255, 255, 255, 0.15)",
+                          borderColor: isSel ? "primary.main" : "rgba(255,255,255,0.15)",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
@@ -644,7 +646,7 @@ export default function AllNotes({ notes, onRefresh }) {
                         }}
                       >
                         {isSel && (
-                          <CheckCircleIcon sx={{ fontSize: 16, color: "#0e7490" }} />
+                          <CheckCircleIcon sx={{ fontSize: 16, color: "primary.main" }} />
                         )}
                       </Box>
                     </Tooltip>
@@ -671,9 +673,9 @@ export default function AllNotes({ notes, onRefresh }) {
                 sx={{
                   textTransform: "none",
                   fontWeight: 700,
-                  borderColor: "#cbd5e1",
-                  color: "#475569",
-                  "&:hover": { borderColor: "#94a3b8" },
+                  borderColor: "rgba(255, 255, 255, 0.15)",
+                  color: "text.secondary",
+                  "&:hover": { borderColor: "rgba(255, 255, 255, 0.3)" },
                 }}
               >
                 Cancel
@@ -683,10 +685,10 @@ export default function AllNotes({ notes, onRefresh }) {
                 variant="contained"
                 disabled={!form.title.trim()}
                 sx={{
-                  backgroundColor: "#0e7490",
+                  backgroundColor: "primary.main",
                   textTransform: "none",
                   fontWeight: 700,
-                  "&:hover": { backgroundColor: "#155e75" },
+                  "&:hover": { backgroundColor: "primary.dark" },
                 }}
               >
                 Save Note
@@ -707,14 +709,14 @@ export default function AllNotes({ notes, onRefresh }) {
         }}
       >
         <DialogTitle sx={{ pb: 1 }}>
-          <Typography variant="h6" fontWeight={800} color="#1e293b">
+          <Typography variant="h6" fontWeight={800} color="text.primary">
             Share Note
           </Typography>
           <Typography variant="caption" color="text.secondary">
             "{noteToShare?.title}"
           </Typography>
         </DialogTitle>
-        <DialogContent dividers sx={{ borderColor: "#f1f5f9" }}>
+        <DialogContent dividers sx={{ borderColor: "rgba(255, 255, 255, 0.08)" }}>
           {/* Contact Search */}
           <TextField
             placeholder="Search connections..."
@@ -724,7 +726,7 @@ export default function AllNotes({ notes, onRefresh }) {
             fullWidth
             sx={{
               mb: 2,
-              backgroundColor: "#f8fafc",
+              backgroundColor: "background.paper",
               borderRadius: 2,
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
@@ -733,7 +735,7 @@ export default function AllNotes({ notes, onRefresh }) {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "#64748b", fontSize: 18 }} />
+                  <SearchIcon sx={{ color: "text.secondary", fontSize: 18 }} />
                 </InputAdornment>
               ),
             }}
@@ -774,11 +776,11 @@ export default function AllNotes({ notes, onRefresh }) {
                           sx={{
                             textTransform: "none",
                             fontWeight: 700,
-                            borderColor: "#0e7490",
-                            color: "#0e7490",
+                            borderColor: "primary.main",
+                            color: "primary.main",
                             "&:hover": {
-                              backgroundColor: "rgba(14, 116, 144, 0.04)",
-                              borderColor: "#155e75",
+                              backgroundColor: "rgba(129, 140, 248, 0.08)",
+                              borderColor: "primary.dark",
                             },
                           }}
                         >
@@ -791,7 +793,7 @@ export default function AllNotes({ notes, onRefresh }) {
                       <Avatar
                         src={friend.profilePic}
                         sx={{
-                          backgroundColor: "#0e7490",
+                          backgroundColor: "primary.main",
                           fontWeight: 700,
                           fontSize: "0.85rem",
                         }}
@@ -804,7 +806,7 @@ export default function AllNotes({ notes, onRefresh }) {
                       primaryTypographyProps={{
                         fontWeight: 600,
                         fontSize: "0.95rem",
-                        color: "#1e293b",
+                        color: "text.primary",
                       }}
                     />
                   </ListItem>
@@ -818,10 +820,10 @@ export default function AllNotes({ notes, onRefresh }) {
             onClick={() => setShareDialogOpen(false)}
             variant="contained"
             sx={{
-              backgroundColor: "#0e7490",
+              backgroundColor: "primary.main",
               textTransform: "none",
               fontWeight: 700,
-              "&:hover": { backgroundColor: "#155e75" },
+              "&:hover": { backgroundColor: "primary.dark" },
             }}
           >
             Done

@@ -95,7 +95,7 @@ export default function ChatListItem({
           >
             <Avatar
               src={isDirect ? participants?.profilePic : item.groupAvatar}
-              sx={{ bgcolor: "#0e7490" }}
+              sx={{ bgcolor: "primary.main" }}
             >
               {(isDirect
                 ? participants?.full_name?.[0]
@@ -134,8 +134,8 @@ export default function ChatListItem({
                     }}
                     sx={{
                       "& .MuiBadge-badge": {
-                        backgroundColor: "#faac15",
-                        color: "white",
+                        backgroundColor: "warning.main",
+                        color: "background.paper",
                       },
                       marginRight: 2,
                     }}
