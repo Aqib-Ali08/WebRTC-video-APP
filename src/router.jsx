@@ -20,7 +20,6 @@ import MeetingRoomPage from "./pages/MeetingRoomPage";
 import ChatSectionPage from "./pages/ChatSectionPage";
 import ChatRoomPage from "./pages/ChatRoomPage";
 import ProfilePage from "./pages/ProfilePage";
-import SettingsPage from "./pages/SettingsPage";
 import { selectAuthData } from "./redux/slices/authSlice";
 import { useSelector } from "react-redux";
 import ProtectedRoute, { getAuthData } from "./layout/ProtectedRoute";
@@ -62,7 +61,6 @@ const AppRoutes = () => {
             <Route path="schedule" element={<Schedules />} />
             <Route path="messages" element={<ChatSectionPage />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Route>
 

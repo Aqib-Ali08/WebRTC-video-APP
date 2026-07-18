@@ -22,9 +22,8 @@ import {
   Dashboard,
   Description,
   PersonAdd,
-  Settings,
 } from "@mui/icons-material";
-import { getCurrentUserFullName } from "../services";
+import { getCurrentUserDetails } from "../services";
 
 const navItems = [
   {
@@ -78,15 +77,6 @@ const navItems = [
       </span>
     ),
   },
-  {
-    path: "/dashboard/settings",
-    label: "Settings",
-    icon: (
-      <span style={{ paddingRight: "0.5rem" }}>
-        <Settings />
-      </span>
-    ),
-  },
 ];
 
 const Sidebar = () => {
@@ -94,7 +84,9 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  const fullName = getCurrentUserFullName();
+  const userDetails = getCurrentUserDetails();
+  const fullName = userDetails?.full_name || "User";
+  const username = userDetails?.username || "N/A";
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -108,12 +100,11 @@ const Sidebar = () => {
     location.pathname.startsWith(item.path)
   );
 
-  const firstName =
-    fullName
-      .split()
-      .map((fullName) => fullName[0])
-      .join("")
-      .toUpperCase() || "User";
+  const firstName = fullName
+    .split(' ')
+    .map((name) => name[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <motion.aside
@@ -150,36 +141,29 @@ const Sidebar = () => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">Profile Details</DialogTitle>
+        <DialogTitle id="alert-dialog-title" fontWeight={700}>Profile Details</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             <TextField
               margin="dense"
-              label="Username"
-              name="username"
+              label="Full Name"
+              value={fullName}
+              InputProps={{ readOnly: true }}
               fullWidth
+              sx={{ mb: 2, mt: 1 }}
             />
-            <TextField margin="dense" label="Email" name="email" fullWidth />
             <TextField
               margin="dense"
-              label="Contact"
-              name="contact"
-              type="number"
+              label="Username"
+              value={username}
+              InputProps={{ readOnly: true }}
               fullWidth
             />
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" size="small" onClick={handleClose}>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="contained" size="small" onClick={handleClose}>
             Close
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleClose}
-            autoFocus
-          >
-            Save
           </Button>
         </DialogActions>
       </Dialog>

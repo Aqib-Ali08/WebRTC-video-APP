@@ -46,6 +46,19 @@ export const getCurrentUserFullName = () => {
   }
 };
 
+export const getCurrentUserDetails = () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    if (!token) return null;
+
+    const decoded = jwtDecode(token);
+    return decoded;
+  } catch (error) {
+    console.error("Invalid token:", error);
+    return null;
+  }
+};
+
 export const handleLogin = async (username, password) => {
   try {
     const response = await axios.post(`${domain}/auth/login`, {

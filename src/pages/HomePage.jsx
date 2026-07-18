@@ -33,9 +33,11 @@ import {
   Popover,
   Divider,
 } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 import CircleIcon from "@mui/icons-material/Circle";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import "react-calendar/dist/Calendar.css";
 import { useNavigate } from "react-router-dom";
 import {
@@ -43,6 +45,9 @@ import {
   handleGetNotifications,
   handleMarkNotificationAsRead,
   handleMarkAllNotificationsAsRead,
+  handleGetMeetings,
+  handleGetUsersChat,
+  handleListConnectedUsers
 } from "../services";
 import { useSocket } from "../context/socketContext";
 import SocketEvents from "../constants/socketEvent";
@@ -52,45 +57,34 @@ import relativeTime from "dayjs/plugin/relativeTime";
 // Load Dayjs relative time plugin
 dayjs.extend(relativeTime);
 
-const analyticsData = [
-  {
-    title: "Total Meetings",
-    value: "24",
-    icon: <VideoCameraFront sx={{ color: "#c026d3", fontSize: 30 }} />,
-  },
-  {
-    title: "Active Chats",
-    value: "8",
-    icon: <ChatBubbleOutline sx={{ color: "#38BDF8", fontSize: 30 }} />,
-  },
-  {
-    title: "Users Online",
-    value: "5",
-    icon: <Person sx={{ color: "#10B981", fontSize: 30 }} />,
-  },
-];
 
-const upcomingMeetings = [
-  { title: "Team Sync", time: "Today • 3:00 PM" },
-  { title: "Client Demo", time: "Tomorrow • 11:00 AM" },
-];
 
-const recentChats = [
-  { name: "Arjun Sen", message: "Let's connect soon!", avatar: "A" },
-  { name: "Priya Das", message: "Shared the document.", avatar: "P" },
-];
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
-const scheduleShortcuts = [
-  { label: "Create Event", icon: <CalendarMonth /> },
-  { label: "Set Reminder", icon: <AccessAlarm /> },
-  { label: "Book Slot", icon: <ScheduleSend /> },
-];
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+};
 
 const HomePage = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const socket = useSocket();
 
   const fullName = getCurrentUserFullName();
+
+  // Dynamic Data States
+  const [meetings, setMeetings] = useState([]);
+  const [chats, setChats] = useState([]);
+  const [connections, setConnections] = useState([]);
 
   // Notifications State
   const [notifications, setNotifications] = useState([]);
@@ -108,6 +102,28 @@ const HomePage = () => {
 
   useEffect(() => {
     loadNotifications();
+    const fetchData = async () => {
+      try {
+        const [meetingsRes, chatsRes, friendsRes] = await Promise.all([
+          handleGetMeetings(),
+          handleGetUsersChat(),
+          handleListConnectedUsers(1, 100)
+        ]);
+        
+        if (meetingsRes?.success && Array.isArray(meetingsRes.data)) {
+          setMeetings(meetingsRes.data);
+        }
+        if (Array.isArray(chatsRes)) {
+          setChats(chatsRes);
+        }
+        if (friendsRes?.data && Array.isArray(friendsRes.data)) {
+          setConnections(friendsRes.data);
+        }
+      } catch (err) {
+        console.error("Error fetching homepage data:", err);
+      }
+    };
+    fetchData();
   }, []);
 
   // Listen for socket notification events to reload counts live
@@ -161,34 +177,81 @@ const HomePage = () => {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const popoverOpen = Boolean(anchorEl);
 
+  const upcomingMeetingsList = meetings
+    .filter(m => dayjs(m.startTime).isAfter(dayjs()))
+    .sort((a, b) => dayjs(a.startTime).diff(dayjs(b.startTime)))
+    .slice(0, 3)
+    .map(m => ({
+      title: m.title,
+      time: dayjs(m.startTime).format("MMM DD • hh:mm A")
+    }));
+
+  const recentChatsList = chats
+    .slice(0, 3)
+    .map(c => {
+      const isDirect = c.type === "direct";
+      const participant = c.participants?.[0];
+      const name = isDirect ? participant?.full_name : c.groupName;
+      const message = c.lastMessage?.content || "No message yet";
+      const avatar = (isDirect ? participant?.full_name?.[0] : c.groupName?.[0]) || "U";
+      return { name, message, avatar };
+    });
+
+  const analyticsData = [
+    {
+      title: "Total Meetings",
+      value: meetings.length.toString(),
+      icon: <VideoCameraFront sx={{ color: "#c026d3", fontSize: 30 }} />,
+    },
+    {
+      title: "Active Chats",
+      value: chats.length.toString(),
+      icon: <ChatBubbleOutline sx={{ color: "#38BDF8", fontSize: 30 }} />,
+    },
+    {
+      title: "Connections",
+      value: connections.length.toString(),
+      icon: <Person sx={{ color: "#10B981", fontSize: 30 }} />,
+    },
+  ];
+
   return (
     <Box
-      p={3}
+      component={motion.div}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      p={{ xs: 2, md: 4, lg: 5 }}
       sx={{
         height: "100vh",
         overflowY: "auto",
         backgroundColor: "background.default",
+        overflowX: "hidden",
       }}
     >
       <Box
+        component={motion.div}
+        variants={itemVariants}
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          mb: 3,
+          mb: 4,
         }}
       >
         <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: "-0.5px" }}>
           <span
             style={{
-              background: "linear-gradient(90deg, #818cf8, #22d3ee)",
+              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.info.main})`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
             Welcome Back,
           </span>{" "}
-          {fullName} 👋
+          <Box component="span" sx={{ color: "text.primary" }}>
+            {fullName} 👋
+          </Box>
         </Typography>
 
         {/* Interactive Notifications Bell */}
@@ -326,21 +389,28 @@ const HomePage = () => {
         </Popover>
       </Box>
 
-      <Typography variant="body1" color="text.secondary" mb={3}>
+      <Typography component={motion.p} variants={itemVariants} variant="body1" color="text.secondary" mb={4}>
         Here's an overview of your activity.
       </Typography>
       {/* Quick Actions */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
+      <Stack component={motion.div} variants={itemVariants} direction={{ xs: "column", sm: "row" }} spacing={2} mb={5}>
         <Button
           variant="contained"
           startIcon={<AddCircleOutline />}
           onClick={() => navigate("/dashboard/meetings")}
           sx={{
-            backgroundColor: "primary.main",
-            borderRadius: 2.5,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+            boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
+            borderRadius: 8,
+            px: 3,
+            py: 1,
             textTransform: "none",
             fontWeight: 700,
-            "&:hover": { backgroundColor: "primary.dark" },
+            transition: "all 0.3s ease",
+            "&:hover": { 
+              transform: "translateY(-3px)",
+              boxShadow: `0 12px 28px ${alpha(theme.palette.primary.main, 0.6)}`,
+            },
           }}
         >
           Create Meeting
@@ -350,11 +420,18 @@ const HomePage = () => {
           startIcon={<MarkUnreadChatAlt />}
           onClick={() => navigate("/dashboard/messages")}
           sx={{
-            backgroundColor: "primary.main",
-            borderRadius: 2.5,
+            background: `linear-gradient(135deg, ${theme.palette.info.main}, ${theme.palette.info.dark})`,
+            boxShadow: `0 8px 24px ${alpha(theme.palette.info.main, 0.4)}`,
+            borderRadius: 8,
+            px: 3,
+            py: 1,
             textTransform: "none",
             fontWeight: 700,
-            "&:hover": { backgroundColor: "primary.dark" },
+            transition: "all 0.3s ease",
+            "&:hover": { 
+              transform: "translateY(-3px)",
+              boxShadow: `0 12px 28px ${alpha(theme.palette.info.main, 0.6)}`,
+            },
           }}
         >
           New Chat
@@ -364,11 +441,18 @@ const HomePage = () => {
           startIcon={<PersonAddAlt1 />}
           onClick={() => navigate("/dashboard/connections")}
           sx={{
-            backgroundColor: "primary.main",
-            borderRadius: 2.5,
+            background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+            boxShadow: `0 8px 24px ${alpha(theme.palette.success.main, 0.4)}`,
+            borderRadius: 8,
+            px: 3,
+            py: 1,
             textTransform: "none",
             fontWeight: 700,
-            "&:hover": { backgroundColor: "primary.dark" },
+            transition: "all 0.3s ease",
+            "&:hover": { 
+              transform: "translateY(-3px)",
+              boxShadow: `0 12px 28px ${alpha(theme.palette.success.main, 0.6)}`,
+            },
           }}
         >
           Add New Connections
@@ -376,10 +460,23 @@ const HomePage = () => {
       </Stack>
 
       {/* Analytics Cards */}
-      <Grid container spacing={3} mb={4}>
+      <Grid container spacing={3} mb={5} component={motion.div} variants={containerVariants}>
         {analyticsData.map((item, index) => (
           <Grid item xs={12} md={4} key={index}>
-            <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+            <Box
+              component={motion.div}
+              variants={itemVariants}
+              whileHover={{ y: -5 }}
+              sx={{
+                p: 3.5,
+                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.paper, 0.4)})`,
+                backdropFilter: "blur(12px)",
+                borderRadius: 4,
+                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.05)}`,
+                transition: "all 0.3s ease",
+              }}
+            >
               <Box
                 sx={{
                   display: "flex",
@@ -396,41 +493,62 @@ const HomePage = () => {
                     alignItems: "center",
                   }}
                 >
-                  {item.icon}
-                  <Typography variant="body1" color="text.secondary">
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 3,
+                      bgcolor: alpha(theme.palette.background.default, 0.6),
+                      boxShadow: `inset 0 2px 10px ${alpha(theme.palette.background.paper, 0.5)}`
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Typography variant="body1" fontWeight={600} color="text.secondary">
                     {item.title}
                   </Typography>
                 </Box>
-                <Typography variant="h5" fontWeight={600}>
+                <Typography variant="h4" fontWeight={800} color="text.primary">
                   {item.value}
                 </Typography>
               </Box>
-            </Paper>
+            </Box>
           </Grid>
         ))}
       </Grid>
 
       {/* Overview Sections */}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} component={motion.div} variants={containerVariants}>
         {/* Upcoming Meetings */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, height: "100%", borderRadius: 3 }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
-            >
+        <Grid item xs={12} md={6}>
+          <Box
+            component={motion.div}
+            variants={itemVariants}
+            sx={{
+              p: 3,
+              height: "100%",
+              background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)}, ${alpha(theme.palette.background.paper, 0.5)})`,
+              backdropFilter: "blur(12px)",
+              borderRadius: 4,
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.05)}`,
+            }}
+          >
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
               <Typography variant="h6" fontWeight={700}>Upcoming Meetings</Typography>
-              <Upcoming sx={{ color: "#fdba74" }} />
+              <Upcoming sx={{ color: theme.palette.warning.main, fontSize: 28 }} />
             </Box>
 
-            {upcomingMeetings.map((meeting, index) => (
-              <Box key={index} mb={2}>
-                <Typography fontWeight={600}>{meeting.title}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {meeting.time}
-                </Typography>
+            {upcomingMeetingsList.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">No upcoming meetings.</Typography>
+            ) : upcomingMeetingsList.map((meeting, index) => (
+              <Box key={index} mb={2.5} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box sx={{ width: 4, height: 40, borderRadius: 2, bgcolor: 'primary.main' }} />
+                <Box>
+                  <Typography fontWeight={700} color="text.primary">{meeting.title}</Typography>
+                  <Typography variant="caption" fontWeight={600} color="text.secondary">
+                    {meeting.time}
+                  </Typography>
+                </Box>
               </Box>
             ))}
 
@@ -440,86 +558,64 @@ const HomePage = () => {
               size="small"
               onClick={() => navigate("/dashboard/meetings")}
               sx={{
-                borderColor: "primary.main",
+                borderColor: alpha(theme.palette.primary.main, 0.5),
                 color: "primary.main",
                 fontWeight: 700,
                 textTransform: "none",
-                borderRadius: 2,
+                borderRadius: 3,
+                mt: 3,
+                transition: "all 0.3s ease",
                 "&:hover": {
-                  backgroundColor: "primary.main",
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                   color: "white",
+                  borderColor: "transparent",
+                  boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
                 },
-                marginTop: "2.5rem",
               }}
             >
               View All
             </Button>
-          </Paper>
-        </Grid>
-
-        {/* Schedule Shortcuts */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, height: "100%", borderRadius: 3 }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
-            >
-              <Typography variant="h6" fontWeight={700}>Schedule Shortcuts</Typography>
-              <Shortcut sx={{ color: "#fdba74" }} />
-            </Box>
-
-            <Stack spacing={2} sx={{ marginTop: "3rem" }}>
-              {scheduleShortcuts.map((shortcut, index) => (
-                <Button
-                  key={index}
-                  variant="outlined"
-                  startIcon={shortcut.icon}
-                  fullWidth
-                  size="small"
-                  onClick={() => navigate("/dashboard/schedule")}
-                  sx={{
-                    borderColor: "primary.main",
-                    color: "primary.main",
-                    fontWeight: 700,
-                    textTransform: "none",
-                    borderRadius: 2,
-                    "&:hover": {
-                      backgroundColor: "primary.main",
-                      color: "white",
-                      "& .MuiSvgIcon-root": { color: "white" },
-                    },
-                  }}
-                >
-                  {shortcut.label}
-                </Button>
-              ))}
-            </Stack>
-          </Paper>
+          </Box>
         </Grid>
 
         {/* Recent Chats */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={2} sx={{ p: 3, height: "100%", borderRadius: 3 }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
+        <Grid item xs={12} md={6}>
+          <Box
+            component={motion.div}
+            variants={itemVariants}
+            sx={{
+              p: 3,
+              height: "100%",
+              background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)}, ${alpha(theme.palette.background.paper, 0.5)})`,
+              backdropFilter: "blur(12px)",
+              borderRadius: 4,
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.05)}`,
+            }}
+          >
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
               <Typography variant="h6" fontWeight={700}>Recent Chats</Typography>
-              <Chat sx={{ color: "#fdba74" }} />
+              <Chat sx={{ color: theme.palette.success.main, fontSize: 28 }} />
             </Box>
 
-            <List>
-              {recentChats.map((chat, index) => (
-                <ListItem key={index} sx={{ px: 0 }}>
+            <List sx={{ px: 0 }}>
+              {recentChatsList.length === 0 ? (
+                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>No recent chats.</Typography>
+              ) : recentChatsList.map((chat, index) => (
+                <ListItem key={index} sx={{ px: 0, py: 1 }}>
                   <ListItemAvatar>
-                    <Avatar sx={{ backgroundColor: "primary.main" }}>
+                    <Avatar sx={{ 
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.info.main})`,
+                      fontWeight: 700 
+                    }}>
                       {chat.avatar}
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary={chat.name} secondary={chat.message} />
+                  <ListItemText 
+                    primary={<Typography fontWeight={600} fontSize="0.95rem">{chat.name}</Typography>}
+                    secondary={chat.message} 
+                    secondaryTypographyProps={{ sx: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.8rem', fontWeight: 500 } }} 
+                  />
                 </ListItem>
               ))}
             </List>
@@ -530,21 +626,24 @@ const HomePage = () => {
               size="small"
               onClick={() => navigate("/dashboard/messages")}
               sx={{
-                borderColor: "primary.main",
-                color: "primary.main",
+                borderColor: alpha(theme.palette.success.main, 0.5),
+                color: "success.main",
                 fontWeight: 700,
                 textTransform: "none",
-                borderRadius: 2,
+                borderRadius: 3,
+                mt: 1.5,
+                transition: "all 0.3s ease",
                 "&:hover": {
-                  backgroundColor: "primary.main",
+                  background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
                   color: "white",
+                  borderColor: "transparent",
+                  boxShadow: `0 8px 24px ${alpha(theme.palette.success.main, 0.4)}`,
                 },
-                marginTop: "1rem",
               }}
             >
               View All
             </Button>
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
     </Box>
