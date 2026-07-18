@@ -381,7 +381,7 @@ const MeetingRoomPage = () => {
   };
 
   const handleEndCall = () => {
-    navigate('/meetings'); // Redirect back
+    navigate('/dashboard/meetings'); // Redirect back
   };
 
   const participantCount = 1 + Object.keys(remoteStreams).length;

@@ -16,7 +16,11 @@ import {
   DialogActions,
   TextField,
   Autocomplete,
-  Chip
+  Chip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -29,11 +33,12 @@ import {
   EventBusy,
   EventRepeat,
   MoreVert,
-  Delete
+  Delete,
+  Edit
 } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleGetMeetings, handleCreateMeeting, handleListConnectedUsers } from "../services";
+import { handleGetMeetings, handleCreateMeeting, handleListConnectedUsers, handleUpdateMeeting, handleDeleteMeeting } from "../services";
 import dayjs from "dayjs";
 
 // Animation Variants
@@ -54,8 +59,17 @@ const itemVariants = {
   }
 };
 
-const MeetingCard = ({ meeting, onJoin }) => {
+const MeetingCard = ({ meeting, onJoin, onEdit, onDelete }) => {
   const theme = useTheme();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   // Highlight if it starts in less than an hour
   const isSoon = dayjs(meeting.startTime).diff(dayjs(), 'minute') > 0 && dayjs(meeting.startTime).diff(dayjs(), 'minute') < 60;
@@ -104,9 +118,24 @@ const MeetingCard = ({ meeting, onJoin }) => {
         <Typography variant="h6" fontWeight="700" color="text.primary">
           {meeting.title}
         </Typography>
-        <IconButton size="small" sx={{ color: "text.secondary" }}>
+        <IconButton size="small" sx={{ color: "text.secondary" }} onClick={handleClick}>
           <MoreVert fontSize="small" />
         </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          PaperProps={{ sx: { borderRadius: 2, minWidth: 120 } }}
+        >
+          <MenuItem onClick={() => { handleClose(); onEdit(meeting); }}>
+            <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
+            <ListItemText>Edit</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => { handleClose(); onDelete(meeting._id); }} sx={{ color: 'error.main' }}>
+            <ListItemIcon><Delete fontSize="small" sx={{ color: 'error.main' }} /></ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
 
       <Box display="inline-block" mt={1} px={1.5} py={0.5} borderRadius={2} bgcolor={alpha(theme.palette.primary.main, 0.1)}>
@@ -167,6 +196,7 @@ const MeetingListPage = () => {
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [reminders, setReminders] = useState([]);
   const [newReminderText, setNewReminderText] = useState("");
+  const [editMeetingId, setEditMeetingId] = useState(null);
 
   const fetchMeetings = async () => {
     try {
@@ -198,14 +228,38 @@ const MeetingListPage = () => {
     if (!newTitle || !newTime) return;
     try {
       const memberIds = selectedFriends.map(f => f._id);
-      await handleCreateMeeting({ title: newTitle, startTime: newTime ? newTime.toISOString() : "", members: memberIds });
+      if (editMeetingId) {
+        await handleUpdateMeeting(editMeetingId, { title: newTitle, startTime: newTime ? newTime.toISOString() : "", members: memberIds });
+      } else {
+        await handleCreateMeeting({ title: newTitle, startTime: newTime ? newTime.toISOString() : "", members: memberIds });
+      }
       setIsModalOpen(false);
       setNewTitle("");
       setNewTime(null);
       setSelectedFriends([]);
+      setEditMeetingId(null);
       fetchMeetings(); // Refresh list
     } catch (err) {
-      console.error("Failed to create meeting", err);
+      console.error("Failed to save meeting", err);
+    }
+  };
+
+  const handleEditClick = (meeting) => {
+    setEditMeetingId(meeting._id);
+    setNewTitle(meeting.title);
+    setNewTime(dayjs(meeting.startTime));
+    setSelectedFriends(meeting.members || []);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = async (meetingId) => {
+    if(window.confirm("Are you sure you want to delete this meeting?")) {
+      try {
+        await handleDeleteMeeting(meetingId);
+        fetchMeetings();
+      } catch (err) {
+        console.error("Failed to delete meeting", err);
+      }
     }
   };
 
@@ -318,7 +372,12 @@ const MeetingListPage = () => {
         <Grid container spacing={3} component={motion.div} variants={containerVariants}>
           {meetings.map((meeting) => (
             <Grid item xs={12} sm={6} lg={4} key={meeting._id}>
-              <MeetingCard meeting={meeting} onJoin={handleJoin} />
+              <MeetingCard 
+                meeting={meeting} 
+                onJoin={handleJoin}
+                onEdit={handleEditClick}
+                onDelete={handleDeleteClick}
+              />
             </Grid>
           ))}
           {meetings.length === 0 && (
@@ -348,7 +407,13 @@ const MeetingListPage = () => {
         <Button
           variant="contained"
           fullWidth
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditMeetingId(null);
+            setNewTitle("");
+            setNewTime(null);
+            setSelectedFriends([]);
+            setIsModalOpen(true);
+          }}
           sx={{
             py: 1.5,
             borderRadius: 3,
@@ -454,7 +519,7 @@ const MeetingListPage = () => {
       </Box>
 
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} PaperProps={{ sx: { borderRadius: 4, p: 2, width: 400 } }}>
-        <DialogTitle fontWeight="bold">Create New Meeting</DialogTitle>
+        <DialogTitle fontWeight="bold">{editMeetingId ? "Edit Meeting" : "Create New Meeting"}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -480,6 +545,7 @@ const MeetingListPage = () => {
             multiple
             options={friends}
             getOptionLabel={(option) => option.full_name || option.username}
+            isOptionEqualToValue={(option, value) => option._id === value._id}
             value={selectedFriends}
             onChange={(event, newValue) => {
               setSelectedFriends(newValue);
@@ -506,7 +572,7 @@ const MeetingListPage = () => {
         </DialogContent>
         <DialogActions sx={{ pb: 2, pr: 2 }}>
           <Button onClick={() => setIsModalOpen(false)} color="inherit" sx={{ textTransform: "none", fontWeight: "bold" }}>Cancel</Button>
-          <Button onClick={handleCreate} variant="contained" sx={{ textTransform: "none", fontWeight: "bold", borderRadius: 2 }}>Create</Button>
+          <Button onClick={handleCreate} variant="contained" sx={{ textTransform: "none", fontWeight: "bold", borderRadius: 2 }}>{editMeetingId ? "Save" : "Create"}</Button>
         </DialogActions>
       </Dialog>
     </Box>

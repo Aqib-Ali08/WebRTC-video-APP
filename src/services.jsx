@@ -669,3 +669,33 @@ export const handleGetMeetingById = async (roomId) => {
     throw error;
   }
 };
+
+export const handleUpdateMeeting = async (id, data) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.put(`${domain}/meetings/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating meeting', error);
+    throw error;
+  }
+};
+
+export const handleDeleteMeeting = async (id) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.delete(`${domain}/meetings/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting meeting', error);
+    throw error;
+  }
+};
