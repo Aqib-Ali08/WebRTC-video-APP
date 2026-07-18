@@ -622,3 +622,50 @@ export const handleMarkAllNotificationsAsRead = async () => {
   }
 };
 
+
+
+// --- Meeting APIs ---
+export const handleCreateMeeting = async (data) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.post(`${domain}/meetings`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating meeting', error);
+    throw error;
+  }
+};
+
+export const handleGetMeetings = async () => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.get(`${domain}/meetings`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching meetings', error);
+    throw error;
+  }
+};
+
+export const handleGetMeetingById = async (roomId) => {
+  try {
+    const token = getTokenFromLocalStorage();
+    const response = await axios.get(`${domain}/meetings/${roomId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching meeting details', error);
+    throw error;
+  }
+};
