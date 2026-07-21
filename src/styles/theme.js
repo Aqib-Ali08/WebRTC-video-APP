@@ -2,21 +2,25 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
     palette: {
-        mode: 'light',
+        mode: 'dark',
         primary: {
-            main: '#6366F1',     // Elegant Indigo
+            main: '#818cf8',     // Modern Indigo
+            light: '#a5b4fc',
+            dark: '#4f46e5',
             contrastText: '#FFFFFF',
         },
         secondary: {
-            main: '#38BDF8',     // Accent Blue
+            main: '#22d3ee',     // Vibrant Cyan
+            light: '#67e8f9',
+            dark: '#0891b2',
         },
         background: {
-            default: '#F3F4F6',  // Light Grayish BG
-            paper: '#FFFFFF',    // Card / Container BG
+            default: '#0b0f19',  // Deep Dark Space BG
+            paper: '#151e33',    // Card / Container BG (Lighter dark)
         },
         text: {
-            primary: '#111827',  // Dark Text
-            secondary: '#6B7280' // Muted Text
+            primary: '#F8FAFC',  // Bright Text
+            secondary: '#94A3B8', // Muted Text
         },
         success: {
             main: '#10B981',     // Emerald
@@ -73,7 +77,7 @@ const theme = createTheme({
         caption: {
             fontSize: '0.75rem', // 12px
             fontWeight: 400,
-            color: '#6B7280',
+            color: '#94A3B8',
             lineHeight: 1.4,
         },
     },
@@ -86,11 +90,11 @@ const theme = createTheme({
         MuiButton: {
             styleOverrides: {
                 root: {
-                    borderRadius: 12,
+                    borderRadius: 8,
                     textTransform: 'none',  // No uppercase by default
                     boxShadow: 'none',
                     '&:hover': {
-                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
                     },
                 },
             },
@@ -99,6 +103,16 @@ const theme = createTheme({
             styleOverrides: {
                 root: {
                     borderRadius: 12,
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    backgroundImage: 'none',
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundImage: 'none',
                 },
             },
         },

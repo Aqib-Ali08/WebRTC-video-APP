@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -13,9 +12,19 @@ import {
   ListItemAvatar,
   ListItemText,
   InputAdornment,
+  Tooltip,
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
+
+import {
+  AddIcCall,
+  AttachFile,
+  EmojiEmotions,
+  MoreVert,
+  Send,
+  VideoCall,
+} from "@mui/icons-material";
 
 const ChatListPage = () => {
   return (
@@ -25,7 +34,7 @@ const ChatListPage = () => {
         elevation={3}
         sx={{ width: 300, p: 2, display: "flex", flexDirection: "column" }}
       >
-        <Box display="flex" alignItems="center" mb={2}>
+        {/* <Box display="flex" alignItems="center" mb={2}>
           <Avatar src="/avatar.jpg" sx={{ mr: 2 }} />
           <Box>
             <Typography variant="h6">Gravid Christofer</Typography>
@@ -33,7 +42,7 @@ const ChatListPage = () => {
               Senior Developer
             </Typography>
           </Box>
-        </Box>
+        </Box> */}
 
         <TextField
           placeholder="Search Friends"
@@ -54,7 +63,7 @@ const ChatListPage = () => {
           ].map((name) => (
             <ListItem key={name} button>
               <ListItemAvatar>
-                <Avatar />
+                <Avatar sx={{ bgcolor: "primary.main" }} />
               </ListItemAvatar>
               <ListItemText
                 primary={<Typography variant="body1">{name}</Typography>}
@@ -76,11 +85,55 @@ const ChatListPage = () => {
         borderRight={1}
         borderColor="divider"
       >
-        <Box p={2} borderBottom={1} borderColor="divider">
-          <Typography variant="h6">
-            Elizabeth Olsen{" "}
-            <span style={{ color: "green", fontSize: 12 }}>●</span>
-          </Typography>
+        <Box
+          p={1}
+          borderBottom={1}
+          borderColor="divider"
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Avatar src="/avatar.jpg" sx={{ mr: 1, bgcolor: "primary.main" }} />
+              <Typography variant="h6">
+                Elizabeth Olsen{" "}
+                {/* <span style={{ color: "green", fontSize: 12 }}>●</span> */}
+              </Typography>
+            </Box>
+          </Box>
+          <Box>
+            <Tooltip title="Audio Call">
+              <IconButton>
+                <AddIcCall />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Video Call">
+              <IconButton>
+                <VideoCall />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="More">
+              <IconButton>
+                <MoreVert />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
 
         <Box
@@ -98,7 +151,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "white", color: "black", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "background.paper", color: "text.primary", borderRadius: 2 }}
             >
               <Typography variant="body2" align="left">
                 That’s Great
@@ -112,7 +165,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "#6C63FF", color: "white", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "primary.main", color: "white", borderRadius: 2 }}
             >
               <Typography variant="body2">
                 I am refer to the project structure and found some mistakes
@@ -127,7 +180,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "#6C63FF", color: "white", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "primary.main", color: "white", borderRadius: 2 }}
             >
               <Typography variant="body2">
                 There are some bugs in this project
@@ -141,7 +194,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "white", color: "black", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "background.paper", color: "text.primary", borderRadius: 2 }}
             >
               <Typography variant="body2" align="left">
                 I see that project
@@ -155,7 +208,7 @@ const ChatListPage = () => {
             animate={{ opacity: 1, x: 0 }}
           >
             <Paper
-              sx={{ p: 1, bgcolor: "white", color: "black", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "background.paper", color: "text.primary", borderRadius: 2 }}
             >
               <Typography variant="body2" align="left">
                 Yes there are many bugs in that project
@@ -170,7 +223,7 @@ const ChatListPage = () => {
             >
               <Typography
                 variant="body2"
-                sx={{ color: "#fff", display: "flex", alignItems: "center" }}
+                sx={{ color: "white", display: "flex", alignItems: "center" }}
               >
                 PDF <Icon icon="mdi:chevron-down" style={{ marginLeft: 4 }} />
               </Typography>
@@ -179,7 +232,7 @@ const ChatListPage = () => {
 
           <Box alignSelf="flex-end">
             <Paper
-              sx={{ p: 1, bgcolor: "#6C63FF", color: "white", borderRadius: 2 }}
+              sx={{ p: 1, bgcolor: "primary.main", color: "white", borderRadius: 2 }}
             >
               <Typography variant="body2">
                 Can you send me the report
@@ -203,22 +256,30 @@ const ChatListPage = () => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <Icon icon="mdi:emoticon-happy-outline" />
+                  <Tooltip title="Add Emoji">
+                    <IconButton>
+                      <EmojiEmotions />
+                    </IconButton>
+                  </Tooltip>
                 </InputAdornment>
               ),
             }}
           />
-          <IconButton color="primary">
-            <Icon icon="mdi:attachment" />
-          </IconButton>
-          <IconButton color="primary">
-            <Icon icon="mdi:send" />
-          </IconButton>
+          <Tooltip title="Add Attachment">
+            <IconButton>
+              <AttachFile />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Send Message">
+            <IconButton>
+              <Send />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Box>
 
       {/* Profile Panel */}
-      <Paper
+      {/* <Paper
         elevation={3}
         sx={{ width: 300, p: 2, display: "flex", flexDirection: "column" }}
       >
@@ -264,7 +325,7 @@ const ChatListPage = () => {
             </Button>
           ))}
         </Box>
-      </Paper>
+      </Paper> */}
     </Box>
   );
 };

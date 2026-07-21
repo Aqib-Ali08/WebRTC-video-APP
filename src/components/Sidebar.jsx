@@ -1,47 +1,110 @@
 // src/components/Sidebar.jsx
-
-import React from "react";
-import { Box, Tabs, Tab, Tooltip } from "@mui/material";
+import {
+  Tabs,
+  Tab,
+  Tooltip,
+  Avatar,
+  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  TextField,
+} from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Icon } from "@iconify/react";
+import { useEffect, useState } from "react";
+import {
+  CalendarMonth,
+  ChatBubble,
+  Dashboard,
+  Description,
+  PersonAdd,
+} from "@mui/icons-material";
+import { getCurrentUserDetails } from "../services";
 
 const navItems = [
-  { path: "/dashboard/home", label: "Home", icon: "material-symbols:home" },
   {
-    path: "/dashboard/meetings",
-    label: "Meetings",
-    icon: "material-symbols:calendar-month",
+    path: "/dashboard/home",
+    label: "Home",
+    icon: (
+      <Badge
+        badgeContent={4}
+        color="primary"
+        sx={{ marginTop: "0.5rem", marginRight: "0.5rem" }}
+      >
+        <span style={{ paddingRight: "0.5rem" }}>
+          <Dashboard />
+        </span>
+      </Badge>
+    ),
   },
   {
     path: "/dashboard/messages",
-    label: "Messages",
-    icon: "material-symbols:chat",
+    label: "Chats",
+    icon: (
+      <span style={{ paddingRight: "0.5rem" }}>
+        <ChatBubble />
+      </span>
+    ),
+  },
+  {
+    path: "/dashboard/meetings",
+    label: "Meetings",
+    icon: (
+      <span style={{ paddingRight: "0.5rem" }}>
+        <CalendarMonth />
+      </span>
+    ),
   },
   {
     path: "/dashboard/schedule",
-    label: "Schedule",
-    icon: "material-symbols:add-circle-outline",
+    label: "Notes",
+    icon: (
+      <span style={{ paddingRight: "0.5rem" }}>
+        <Description />
+      </span>
+    ),
   },
   {
-    path: "/dashboard/profile",
-    label: "Profile",
-    icon: "material-symbols:person",
-  },
-  {
-    path: "/dashboard/settings",
-    label: "Settings",
-    icon: "material-symbols:settings",
+    path: "/dashboard/connections",
+    label: "Connections",
+    icon: (
+      <span style={{ paddingRight: "0.5rem" }}>
+        <PersonAdd />
+      </span>
+    ),
   },
 ];
 
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  const userDetails = getCurrentUserDetails();
+  const fullName = userDetails?.full_name || "User";
+  const username = userDetails?.username || "N/A";
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const currentTab = navItems.findIndex((item) =>
     location.pathname.startsWith(item.path)
   );
+
+  const firstName = fullName
+    .split(' ')
+    .map((name) => name[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <motion.aside
@@ -51,23 +114,59 @@ const Sidebar = () => {
       style={{
         width: "80px",
         height: "100vh",
-        background: "#f9fafb",
-        boxShadow: "2px 0 6px rgba(0,0,0,0.05)",
+        background: "#0c1322",
+        boxShadow: "2px 0 10px rgba(0, 0, 0, 0.3)",
         padding: "1rem 0",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        overflowY: "auto",
+        borderRight: "1px solid rgba(255, 255, 255, 0.05)"
       }}
     >
-      <Box
-        fontWeight={700}
-        fontSize="1.3rem"
-        mb={4}
-        sx={{ fontFamily: "Poppins", color: "#667eea", cursor: "pointer" }}
-        onClick={() => navigate("/dashboard/home")}
+      <Tooltip title={fullName}>
+        <Avatar
+          sx={{
+            backgroundColor: "primary.main",
+            cursor: "pointer",
+          }}
+          onClick={handleClickOpen}
+        >
+          {firstName}
+        </Avatar>
+      </Tooltip>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
       >
-        S
-      </Box>
+        <DialogTitle id="alert-dialog-title" fontWeight={700}>Profile Details</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <TextField
+              margin="dense"
+              label="Full Name"
+              value={fullName}
+              InputProps={{ readOnly: true }}
+              fullWidth
+              sx={{ mb: 2, mt: 1 }}
+            />
+            <TextField
+              margin="dense"
+              label="Username"
+              value={username}
+              InputProps={{ readOnly: true }}
+              fullWidth
+            />
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="contained" size="small" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Tabs
         orientation="vertical"
@@ -75,31 +174,30 @@ const Sidebar = () => {
         onChange={(_, newValue) => navigate(navItems[newValue].path)}
         sx={{
           ".MuiTabs-flexContainer": {
-            marginTop:'3rem',
+            marginTop: "3rem",
             gap: "1rem",
           },
           ".MuiTabs-indicator": {
-            backgroundColor: "#667eea",
+            backgroundColor: "primary.main",
             width: "4px",
           },
         }}
       >
         {navItems.map((item, index) => (
-          <Tooltip title={item.label} placement="right">
+          <Tooltip key={index} title={item.label} placement="right">
             <Tab
-              icon={
-                <Icon
-                  icon={item.icon}
-                  width="24"
-                  color={currentTab === index ? "#667eea" : "rgba(0,0,0,0.6)"}
-                />
-              }
+              icon={item.icon}
               sx={{
                 minWidth: "auto",
-                padding: "12px",
+                padding: "8px",
                 borderRadius: "10px",
+                color: "text.secondary",
+                "&.Mui-selected": {
+                  color: "primary.main",
+                },
                 "&:hover": {
-                  backgroundColor: "rgba(102, 126, 234, 0.1)",
+                  backgroundColor: "rgba(129, 140, 248, 0.1)",
+                  color: "primary.light",
                 },
               }}
             />
